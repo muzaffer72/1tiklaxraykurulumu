@@ -390,22 +390,47 @@ validate_domain() {
 
 # Fungsi untuk meminta input domain
 input_domain() {
-    while true; do
-        echo -e "${YB}Alan Adı Girişi${NC}"
-        echo " "
-        read -rp $'\e[33;1mAlan adınızı girin: \e[0m' -e dns
-
-        if [ -z "$dns" ]; then
-            echo -e "${RB}Alan adı girişi boş bırakılamaz!${NC}"
-        elif ! validate_domain "$dns"; then
-            echo -e "${RB}Alan adı formatı geçersiz! Lütfen geçerli bir alan adı girin.${NC}"
-        else
-            echo "$dns" > /usr/local/etc/xray/dns/domain
-            echo "DNS=$dns" > /var/lib/dnsvps.conf
-            echo -e "Alan adı ${GB}${dns}${NC} başarıyla kaydedildi"
-            break
-        fi
-    done
+    # Ana alan adını onvao.net olarak sabitliyoruz
+    MAIN_DOMAIN="onvao.net"
+    echo -e "${YB}Alan Adı Oluşturuluyor...${NC}"
+    
+    # Sunucu IP adresini al
+    IP_ADDRESS=$(curl -s -4 ifconfig.me)
+    if [ -z "$IP_ADDRESS" ]; then
+        IP_ADDRESS=$(curl -s ipinfo.io/ip)
+    fi
+    
+    # 5 karakterli rastgele bir string oluştur (a-z, 0-9)
+    RANDOM_PREFIX=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 5 | head -n 1)
+    
+    # Alt alan adını oluştur
+    SUBDOMAIN="${RANDOM_PREFIX}.${MAIN_DOMAIN}"
+    
+    echo -e "${YB}IP Adresi: ${CB}${IP_ADDRESS}${NC}"
+    echo -e "${YB}Oluşturulan Alan Adı: ${GB}${SUBDOMAIN}${NC}"
+    
+    # Alan kimliği ve API anahtarı tanımla
+    API_EMAIL="guzelim.batmanli@gmail.com"
+    API_KEY="4aa140cf85fde3adadad1856bdf67cf5ad460"
+    DOMAIN="${MAIN_DOMAIN}"
+    TYPE_A="A"
+    TYPE_CNAME="CNAME"
+    NAME_A="${SUBDOMAIN}"
+    NAME_CNAME="*.${SUBDOMAIN}"
+    TARGET_CNAME="${SUBDOMAIN}"
+    
+    # Cloudflare API'yi kullan
+    get_zone_id
+    
+    # Aynı IP adresine bağlı mevcut kayıtları sil
+    delete_records_based_on_ip
+    
+    # Yeni A ve CNAME kayıtlarını oluştur
+    create_A_record
+    create_CNAME_record
+    
+    echo -e "Alan adı ${GB}${SUBDOMAIN}${NC} başarıyla oluşturuldu ve kaydedildi"
+    sleep 2
 }
 
 # Fungsi untuk mendapatkan Zone ID
@@ -577,7 +602,7 @@ setup_domain() {
         # Menampilkan pilihan untuk menggunakan domain acak atau domain sendiri
         echo -e "${YB}Seçenekler:"
         echo -e "${WB}1. Kullanılabilir alan adı kullan"
-        echo -e "${WB}2. Kendi alan adını kullan"
+        echo -e "${WB}2. Otomatik alan adı oluştur (onvao.net)"
 
         # Meminta input dari pengguna untuk memilih opsi
         read -rp $'\e[33;1mSeçiminizi girin: \e[0m' choice
@@ -654,7 +679,6 @@ setup_domain() {
                                         echo -e "${RB}DNS adı zaten var! Lütfen tekrar deneyin.${NC}"
                                         sleep 2
                                     else
-                                        # get_zone_id
                                         delete_records_based_on_ip
                                         create_A_record
                                         create_CNAME_record
@@ -675,8 +699,52 @@ setup_domain() {
                 done
                 ;;
             2)
-                input_domain
-                install_acme_sh2
+                # Otomatik alan adı oluşturma
+                echo -e "${YB}Otomatik alan adı oluşturuluyor...${NC}"
+                
+                # Ana alan adını onvao.net olarak sabitliyoruz
+                MAIN_DOMAIN="onvao.net"
+                
+                # Sunucu IP adresini al
+                IP_ADDRESS=$(curl -s -4 ifconfig.me)
+                if [ -z "$IP_ADDRESS" ]; then
+                    IP_ADDRESS=$(curl -s ipinfo.io/ip)
+                fi
+                
+                # 5 karakterli rastgele bir string oluştur (a-z, 0-9)
+                RANDOM_PREFIX=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 5 | head -n 1)
+                
+                # Alt alan adını oluştur
+                SUBDOMAIN="${RANDOM_PREFIX}.${MAIN_DOMAIN}"
+                
+                echo -e "${YB}IP Adresi: ${CB}${IP_ADDRESS}${NC}"
+                echo -e "${YB}Oluşturulan Alan Adı: ${GB}${SUBDOMAIN}${NC}"
+                
+                # Alan kimliği ve API anahtarı tanımla
+                API_EMAIL="guzelim.batmanli@gmail.com"
+                API_KEY="4aa140cf85fde3adadad1856bdf67cf5ad460"
+                DOMAIN="${MAIN_DOMAIN}"
+                TYPE_A="A"
+                TYPE_CNAME="CNAME"
+                NAME_A="${SUBDOMAIN}"
+                NAME_CNAME="*.${SUBDOMAIN}"
+                TARGET_CNAME="${SUBDOMAIN}"
+                
+                # Cloudflare API'yi kullan
+                get_zone_id
+                
+                # Aynı IP adresine bağlı mevcut kayıtları sil
+                delete_records_based_on_ip
+                
+                # Yeni A ve CNAME kayıtlarını oluştur
+                create_A_record
+                create_CNAME_record
+                
+                # SSL sertifikası kur
+                install_acme_sh
+                
+                echo -e "Alan adı ${GB}${SUBDOMAIN}${NC} başarıyla oluşturuldu ve kaydedildi"
+                sleep 2
                 break
                 ;;
             *)
@@ -685,8 +753,6 @@ setup_domain() {
                 ;;
         esac
     done
-
-    sleep 2
 }
 
 # Panggil fungsi install_acme_sh untuk menginstal acme.sh dan mendapatkan sertifikat

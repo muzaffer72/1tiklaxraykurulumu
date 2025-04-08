@@ -35,7 +35,7 @@ print_error() {
 
 # Cloudflare API kimlik bilgilerinizi ayarlayın
 API_EMAIL="guzelim.batmanli@gmail.com"
-API_KEY="4aa140cf85fde3adadad1856bdf67cf5ad460"
+API_KEY="4aa140cf85fde3adadad1856bdf67cf5ad460"  # Buraya Cloudflare Global API Key'inizi girin
 
 # DNS kayıt detaylarını ayarlayın
 TYPE_A="A"
@@ -55,20 +55,116 @@ validate_domain() {
 # Alan adı giriş fonksiyonu
 input_domain() {
     while true; do
-        echo -e "${YB}Alan Adı Girin${NC}"
-        echo " "
-        read -rp $'\e[33;1mAlan adınızı girin: \e[0m' -e dns
+        clear
+        echo -e "${BB}————————————————————————————————————————————————————————"
+        echo -e "${YB}                 ÖZEL ALAN ADI AYARLARI"
+        echo -e "${BB}————————————————————————————————————————————————————————"
+        echo -e "${YB}Seçenek Belirleyin:"
+        echo -e "${WB}1. Kendi alan adımı gir"
+        echo -e "${WB}2. onvao.net alt alan adı oluştur"
+        echo -e "${GB}3. Geri${NC}"
+        
+        read -rp $'\e[33;1mSeçiminizi girin: \e[0m' domain_choice
+        
+        case $domain_choice in
+            1)
+                echo -e "${YB}Alan Adı Girin${NC}"
+                echo " "
+                read -rp $'\e[33;1mAlan adınızı girin: \e[0m' -e dns
 
-        if [ -z "$dns" ]; then
-            echo -e "${RB}Alan adı girilmedi!${NC}"
-        elif ! validate_domain "$dns"; then
-            echo -e "${RB}Alan adı formatı geçersiz! Lütfen geçerli bir alan adı girin.${NC}"
-        else
-            echo "$dns" > /usr/local/etc/xray/dns/domain
-            echo "DNS=$dns" > /var/lib/dnsvps.conf
-            echo -e "Alan adı ${GB}${dns}${NC} başarıyla kaydedildi"
-            break
-        fi
+                if [ -z "$dns" ]; then
+                    echo -e "${RB}Alan adı girilmedi!${NC}"
+                    sleep 2
+                    continue
+                elif ! validate_domain "$dns"; then
+                    echo -e "${RB}Alan adı formatı geçersiz! Lütfen geçerli bir alan adı girin.${NC}"
+                    sleep 2
+                    continue
+                else
+                    echo "$dns" > /usr/local/etc/xray/dns/domain
+                    echo "DNS=$dns" > /var/lib/dnsvps.conf
+                    echo -e "Alan adı ${GB}${dns}${NC} başarıyla kaydedildi"
+                    update_nginx_config
+                    sleep 2
+                    break
+                fi
+                ;;
+            2)
+                DOMAIN="onvao.net"
+                
+                while true; do
+                    echo -e "${YB}onvao.net için alt alan adı seçeneği:"
+                    echo -e "${WB}1. Rastgele alt alan adı oluştur"
+                    echo -e "${WB}2. Özel alt alan adı oluştur${NC}"
+                    echo -e " "
+                    echo -e "${GB}3. Geri${NC}"
+                    
+                    read -rp $'\e[33;1mSeçiminizi girin: \e[0m' sub_domain_choice
+                    
+                    case $sub_domain_choice in
+                        1)
+                            NAME_A="$(openssl rand -hex 2).$DOMAIN"
+                            NAME_CNAME="*.$NAME_A"
+                            TARGET_CNAME="$NAME_A"
+                            
+                            get_zone_id
+                            delete_records_based_on_ip
+                            create_A_record
+                            create_CNAME_record
+                            update_nginx_config
+                            return
+                            ;;
+                        2)
+                            while true; do
+                                read -rp $'\e[33;1mAlt alan adını girin (sadece küçük harfler ve rakamlar, boşluk olmadan): \e[0m' custom_dns_name
+                                
+                                if [[ ! "$custom_dns_name" =~ ^[a-z0-9-]+$ ]]; then
+                                    echo -e "${RB}Alt alan adı sadece küçük harfler, rakamlar ve tire içerebilir, boşluk olmadan!${NC}"
+                                    sleep 2
+                                    continue
+                                fi
+                                
+                                if [ -z "$custom_dns_name" ]; then
+                                    echo -e "${RB}Alt alan adı boş olamaz!${NC}"
+                                    sleep 2
+                                    continue
+                                fi
+                                
+                                NAME_A="$custom_dns_name.$DOMAIN"
+                                NAME_CNAME="*.$NAME_A"
+                                TARGET_CNAME="$NAME_A"
+
+                                get_zone_id
+                                if check_dns_record "$NAME_A" "$ZONE_ID"; then
+                                    echo -e "${RB}Bu alt alan adı zaten mevcut! Lütfen farklı bir ad deneyin.${NC}"
+                                    sleep 2
+                                else
+                                    delete_records_based_on_ip
+                                    create_A_record
+                                    create_CNAME_record
+                                    update_nginx_config
+                                    return
+                                fi
+                            done
+                            ;;
+                        3)
+                            break
+                            ;;
+                        *)
+                            echo -e "${RB}Geçersiz seçim!${NC}"
+                            sleep 2
+                            ;;
+                    esac
+                done
+                ;;
+            3)
+                return
+                ;;
+            *)
+                echo -e "${RB}Geçersiz seçim!${NC}"
+                sleep 2
+                ;;
+        esac
     done
 }
 
@@ -203,55 +299,55 @@ check_dns_record() {
   fi
 }
 
-# Update Nginx configuration
+# Nginx yapılandırmasını güncelleme
 update_nginx_config() {
-    # Get new domain from file
+    # Dosyadan yeni domain adını alma
     NEW_DOMAIN=$(cat /usr/local/etc/xray/dns/domain)
-    # Update server_name in Nginx configuration
+    # Nginx yapılandırmasında server_name'i güncelleme
     wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/nginx.conf
     sed -i "s/server_name web.com;/server_name $NEW_DOMAIN;/g" /etc/nginx/nginx.conf
     sed -i "s/server_name \*.web.com;/server_name \*.$NEW_DOMAIN;/" /etc/nginx/nginx.conf
 
-    # Check if Nginx configuration is valid after changes
+    # Değişikliklerden sonra Nginx yapılandırmasının geçerli olup olmadığını kontrol etme
     if nginx -t &> /dev/null; then
-        # Reload Nginx configuration if valid
+        # Eğer yapılandırma geçerliyse, Nginx'i yeniden yükleme
         systemctl reload nginx
-        print_msg $GB "Nginx configuration reloaded successfully."
+        print_msg $GB "Nginx yapılandırması başarıyla yeniden yüklendi."
     else
-        # If Nginx configuration is not valid, display error message
-        print_msg $RB "Nginx configuration test failed. Please check your configuration."
+        # Eğer Nginx yapılandırması geçerli değilse, hata mesajı gösterme
+        print_msg $RB "Nginx yapılandırma testi başarısız oldu. Lütfen yapılandırmanızı kontrol edin."
     fi
 }
 
-# Fungsi untuk menampilkan menu utama
+# Ana menüyü görüntüleme fonksiyonu
 setup_domain() {
     while true; do
         clear
 
-        # Menampilkan judul
+        # Başlığı görüntüleme
         echo -e "${BB}————————————————————————————————————————————————————————"
-        echo -e "${YB}                      SETUP DOMAIN"
+        echo -e "${YB}                     ALAN ADI AYARLARI"
         echo -e "${BB}————————————————————————————————————————————————————————"
 
-        # Menampilkan pilihan untuk menggunakan domain acak atau domain sendiri
-        echo -e "${YB}Pilih Opsi:"
-        echo -e "${WB}1. Gunakan domain yang tersedia"
-        echo -e "${WB}2. Gunakan domain sendiri"
+        # Alan adı seçeneklerini görüntüleme
+        echo -e "${YB}Seçenek Belirleyin:"
+        echo -e "${WB}1. Hazır alan adlarını kullan"
+        echo -e "${WB}2. Kendi alan adımı kullan"
 
-        # Meminta input dari pengguna untuk memilih opsi
-        read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' choice
+        # Kullanıcıdan seçim isteme
+        read -rp $'\e[33;1mSeçiminizi girin: \e[0m' choice
 
-        # Memproses pilihan pengguna
+        # Kullanıcı seçimini işleme
         case $choice in
             1)
                 while true; do
-                    echo -e "${YB}Pilih Domain anda:"
+                    echo -e "${YB}Alan Adınızı Seçin:"
                     echo -e "${WB}1. vless.sbs"
                     echo -e "${WB}2. airi.buzz"
                     echo -e "${WB}3. drm.icu${NC}"
                     echo -e " "
-                    echo -e "${GB}4. kembali${NC}"
-                    read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' domain_choice
+                    echo -e "${GB}4. Geri${NC}"
+                    read -rp $'\e[33;1mSeçiminizi girin: \e[0m' domain_choice
                     case $domain_choice in
                         1)
                             DOMAIN="vless.sbs"
@@ -269,19 +365,19 @@ setup_domain() {
                             break
                             ;;
                         *)
-                            echo -e "${RB}Pilihan tidak valid!${NC}"
+                            echo -e "${RB}Geçersiz seçim!${NC}"
                             sleep 2
                             continue
                             ;;
                     esac
 
                     while true; do
-                        echo -e "${YB}Pilih opsi untuk nama DNS:"
-                        echo -e "${WB}1. Buat nama DNS secara acak"
-                        echo -e "${WB}2. Buat nama DNS sendiri${NC}"
+                        echo -e "${YB}DNS adı için seçenek belirleyin:"
+                        echo -e "${WB}1. Rastgele DNS adı oluştur"
+                        echo -e "${WB}2. Özel DNS adı oluştur${NC}"
                         echo -e " "
-                        echo -e "${GB}3. Kembali${NC}"
-                        read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' dns_name_choice
+                        echo -e "${GB}3. Geri${NC}"
+                        read -rp $'\e[33;1mSeçiminizi girin: \e[0m' dns_name_choice
                         case $dns_name_choice in
                             1)
                                 NAME_A="$(openssl rand -hex 2).$DOMAIN"
@@ -296,14 +392,14 @@ setup_domain() {
                                 ;;
                             2)
                                 while true; do
-                                    read -rp $'\e[33;1mMasukkan nama DNS Anda (hanya huruf kecil dan angka, tanpa spasi): \e[0m' custom_dns_name
+                                    read -rp $'\e[33;1mDNS adınızı girin (sadece küçük harfler ve rakamlar, boşluk olmadan): \e[0m' custom_dns_name
                                     if [[ ! "$custom_dns_name" =~ ^[a-z0-9-]+$ ]]; then
-                                        echo -e "${RB}Nama DNS hanya boleh mengandung huruf kecil dan angka, tanpa spasi!${NC}"
+                                        echo -e "${RB}DNS adı sadece küçük harfler, rakamlar ve tire içerebilir, boşluk olmadan!${NC}"
                                         sleep 2
                                         continue
                                     fi
                                     if [ -z "$custom_dns_name" ]; then
-                                        echo -e "${RB}Nama DNS tidak boleh kosong!${NC}"
+                                        echo -e "${RB}DNS adı boş olamaz!${NC}"
                                         sleep 2
                                         continue
                                     fi
@@ -313,7 +409,7 @@ setup_domain() {
 
                                     get_zone_id
                                     if check_dns_record "$NAME_A" "$ZONE_ID"; then
-                                        echo -e "${RB}Nama DNS sudah ada! Silakan coba lagi.${NC}"
+                                        echo -e "${RB}DNS adı zaten mevcut! Lütfen farklı bir ad deneyin.${NC}"
                                         sleep 2
                                     else
                                         # get_zone_id
@@ -329,7 +425,7 @@ setup_domain() {
                                 break
                                 ;;
                             *)
-                                echo -e "${RB}Pilihan tidak valid!${NC}"
+                                echo -e "${RB}Geçersiz seçim!${NC}"
                                 sleep 2
                                 ;;
                         esac
@@ -338,11 +434,10 @@ setup_domain() {
                 ;;
             2)
                 input_domain
-                update_nginx_config
                 break
                 ;;
             *)
-                echo -e "${RB}Pilihan tidak valid!${NC}"
+                echo -e "${RB}Geçersiz seçim!${NC}"
                 sleep 2
                 ;;
         esac
@@ -351,20 +446,18 @@ setup_domain() {
     sleep 2
 }
 
-# Menjalankan menu utama
+# Ana menüyü çalıştırma
 setup_domain
 
 input_menu() {
-    # Isi dengan fungsi atau perintah untuk menampilkan menu Anda
-    echo -e "${RB}Dont forget to renew certificate.${NC}"
+    # Menüye dönüş işlemleri
+    echo -e "${RB}Sertifikanızı yenilemeyi unutmayın.${NC}"
     sleep 5
-    echo -e "${YB}Returning to menu...${NC}"
+    echo -e "${YB}Menüye dönülüyor...${NC}"
     sleep 2
     clear
     menu
-    # Contoh: panggil skrip menu atau perintah lain
-    # ./menu.sh
 }
 
-# Panggil fungsi menu untuk kembali ke menu
+# Menüye dönüş fonksiyonunu çağırma
 input_menu

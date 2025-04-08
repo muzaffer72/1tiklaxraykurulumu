@@ -403,24 +403,172 @@ validate_domain() {
     fi
 }
 
-# Alan adı isteyen fonksiyon
-input_domain() {
+# Ana menü fonksiyonu
+setup_domain() {
     while true; do
-        echo -e "${YB}Alan adı girin${NC}"
-        echo " "
-        read -rp $'\e[33;1mAlan adınızı girin: \e[0m' -e dns
+        clear
 
-        if [ -z "$dns" ]; then
-            echo -e "${RB}Alan adı girilmedi!${NC}"
-        elif ! validate_domain "$dns"; then
-            echo -e "${RB}Alan adı geçersiz! Lütfen geçerli bir alan adı girin.${NC}"
-        else
-            echo "$dns" > /usr/local/etc/xray/dns/domain
-            echo "DNS=$dns" > /var/lib/dnsvps.conf
-            echo -e "Alan adı ${GB}${dns}${NC} başarıyla kaydedildi"
-            break
-        fi
+        # Başlık
+        echo -e "${BB}————————————————————————————————————————————————————————"
+        echo -e "${YB}                      SETUP DOMAIN"
+        echo -e "${BB}————————————————————————————————————————————————————————"
+
+        # Kullanıcı seçeneklerini gösterme
+        echo -e "${YB}Seçenekleri:"
+        echo -e "${WB}1. Kullanılabilir alan adı kullan"
+        echo -e "${WB}2. Otomatik alan adı oluştur (onvao.net)"
+
+        # Kullanıcıdan seçim alma
+        read -rp $'\e[33;1mSeçiminizi girin: \e[0m' choice
+
+        # Kullanıcı seçimini işleme
+        case $choice in
+            1)
+                while true; do
+                    echo -e "${YB}Alanınızı seçin:"
+                    echo -e "${WB}1. vless.sbs"
+                    echo -e "${WB}2. airi.buzz"
+                    echo -e "${WB}3. balrog.cfd${NC}"
+                    echo -e " "
+                    echo -e "${GB}4. geri${NC}"
+                    read -rp $'\e[33;1mSeçiminizi girin: \e[0m' domain_choice
+                    case $domain_choice in
+                        1)
+                            DOMAIN="vless.sbs"
+                            ;;
+                        2)
+                            DOMAIN="airi.buzz"
+                            ;;
+                        3)
+                            DOMAIN="balrog.cfd"
+                            ;;
+                        4)
+                            break
+                            ;;
+                        *)
+                            echo -e "${RB}Geçersiz seçim!${NC}"
+                            sleep 2
+                            continue
+                            ;;
+                    esac
+
+                    while true; do
+                        echo -e "${YB}DNS için adı seçin:"
+                        echo -e "${WB}1. Rastgele ad oluştur"
+                        echo -e "${WB}2. Özel ad oluştur${NC}"
+                        echo -e " "
+                        echo -e "${GB}3. Geri${NC}"
+                        read -rp $'\e[33;1mSeçiminizi girin: \e[0m' dns_name_choice
+                        case $dns_name_choice in
+                            1)
+                                NAME_A="$(openssl rand -hex 2).$DOMAIN"
+                                NAME_CNAME="*.$NAME_A"
+                                TARGET_CNAME="$NAME_A"
+                                get_zone_id
+                                delete_records_based_on_ip
+                                create_A_record
+                                create_CNAME_record
+                                install_acme_sh
+                                return
+                                ;;
+                            2)
+                                while true; do
+                                    read -rp $'\e[33;1mÖzel adınızı girin (sadece küçük harf ve rakam, boşluk içermeyin): \e[0m' custom_dns_name
+                                    if [[ ! "$custom_dns_name" =~ ^[a-z0-9-]+$ ]]; then
+                                        echo -e "${RB}Alan adı sadece küçük harf ve rakam içermeli, boşluk içermemeli!${NC}"
+                                        sleep 2
+                                        continue
+                                    fi
+                                    if [ -z "$custom_dns_name" ]; then
+                                        echo -e "${RB}Alan adı boş bırakılmamalı!${NC}"
+                                        sleep 2
+                                        continue
+                                    fi
+                                    NAME_A="$custom_dns_name.$DOMAIN"
+                                    NAME_CNAME="*.$NAME_A"
+                                    TARGET_CNAME="$NAME_A"
+
+                                    get_zone_id
+                                    if check_dns_record "$NAME_A" "$ZONE_ID"; then
+                                        echo -e "${RB}Alan adı zaten var! Lütfen tekrar deneyin.${NC}"
+                                        sleep 2
+                                    else
+                                        delete_records_based_on_ip
+                                        create_A_record
+                                        create_CNAME_record
+                                        install_acme_sh
+                                        return
+                                    fi
+                                done
+                                ;;
+                            3)
+                                break
+                                ;;
+                            *)
+                                echo -e "${RB}Geçersiz seçim!${NC}"
+                                sleep 2
+                                ;;
+                        esac
+                    done
+                done
+                ;;
+            2)
+                # Otomatik alan adı oluşturma
+                echo -e "${YB}Otomatik alan adı oluşturuluyor...${NC}"
+                
+                # Ana alan adını onvao.net olarak sabitliyoruz
+                MAIN_DOMAIN="onvao.net"
+                
+                # Sunucu IP adresini al
+                IP_ADDRESS=$(curl -s -4 ifconfig.me)
+                if [ -z "$IP_ADDRESS" ]; then
+                    IP_ADDRESS=$(curl -s ipinfo.io/ip)
+                fi
+                
+                # 5 karakterli rastgele bir string oluştur (a-z, 0-9)
+                RANDOM_PREFIX=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 5 | head -n 1)
+                
+                # Alt alan adını oluştur
+                SUBDOMAIN="${RANDOM_PREFIX}.${MAIN_DOMAIN}"
+                
+                echo -e "${YB}IP Adresi: ${CB}${IP_ADDRESS}${NC}"
+                echo -e "${YB}Oluşturulan Alan Adı: ${GB}${SUBDOMAIN}${NC}"
+                
+                # Alan kimliği ve API anahtarı tanımla
+                API_EMAIL="guzelim.batmanli@gmail.com"
+                API_KEY="4aa140cf85fde3adadad1856bdf67cf5ad460"
+                DOMAIN="${MAIN_DOMAIN}"
+                TYPE_A="A"
+                TYPE_CNAME="CNAME"
+                NAME_A="${SUBDOMAIN}"
+                NAME_CNAME="*.${SUBDOMAIN}"
+                TARGET_CNAME="${SUBDOMAIN}"
+                
+                # Cloudflare API'yi kullan
+                get_zone_id
+                
+                # Aynı IP adresine bağlı mevcut kayıtları sil
+                delete_records_based_on_ip
+                
+                # Yeni A ve CNAME kayıtlarını oluştur
+                create_A_record
+                create_CNAME_record
+                
+                # SSL sertifikası kur
+                install_acme_sh
+                
+                echo -e "Alan adı ${GB}${SUBDOMAIN}${NC} başarıyla oluşturuldu ve kaydedildi"
+                sleep 2
+                break
+                ;;
+            *)
+                echo -e "${RB}Geçersiz seçim!${NC}"
+                sleep 2
+                ;;
+        esac
     done
+
+    sleep 2
 }
 
 # Alan ID'yi alma fonksiyonu
@@ -580,135 +728,6 @@ install_acme_sh2() {
 }
 
 # Ana menü fonksiyonu
-setup_domain() {
-    while true; do
-        clear
-
-        # Başlık
-        echo -e "${BB}————————————————————————————————————————————————————————"
-        echo -e "${YB}                      SETUP DOMAIN"
-        echo -e "${BB}————————————————————————————————————————————————————————"
-
-        # Kullanıcı seçeneklerini gösterme
-        echo -e "${YB}Seçenekleri:"
-        echo -e "${WB}1. Kullanılabilir alan adı kullan"
-        echo -e "${WB}2. Özel alan adı kullan"
-
-        # Kullanıcıdan seçim alma
-        read -rp $'\e[33;1mSeçiminizi girin: \e[0m' choice
-
-        # Kullanıcı seçimini işleme
-        case $choice in
-            1)
-                while true; do
-                    echo -e "${YB}Alanınızı seçin:"
-                    echo -e "${WB}1. vless.sbs"
-                    echo -e "${WB}2. airi.buzz"
-                    echo -e "${WB}3. balrog.cfd${NC}"
-                    echo -e " "
-                    echo -e "${GB}4. geri${NC}"
-                    read -rp $'\e[33;1mSeçiminizi girin: \e[0m' domain_choice
-                    case $domain_choice in
-                        1)
-                            DOMAIN="vless.sbs"
-                            ;;
-                        2)
-                            DOMAIN="airi.buzz"
-                            ;;
-                        3)
-                            DOMAIN="balrog.cfd"
-                            ;;
-                        4)
-                            break
-                            ;;
-                        *)
-                            echo -e "${RB}Geçersiz seçim!${NC}"
-                            sleep 2
-                            continue
-                            ;;
-                    esac
-
-                    while true; do
-                        echo -e "${YB}DNS için adı seçin:"
-                        echo -e "${WB}1. Rastgele ad oluştur"
-                        echo -e "${WB}2. Özel ad oluştur${NC}"
-                        echo -e " "
-                        echo -e "${GB}3. Geri${NC}"
-                        read -rp $'\e[33;1mSeçiminizi girin: \e[0m' dns_name_choice
-                        case $dns_name_choice in
-                            1)
-                                NAME_A="$(openssl rand -hex 2).$DOMAIN"
-                                NAME_CNAME="*.$NAME_A"
-                                TARGET_CNAME="$NAME_A"
-                                get_zone_id
-                                delete_records_based_on_ip
-                                create_A_record
-                                create_CNAME_record
-                                install_acme_sh
-                                return
-                                ;;
-                            2)
-                                while true; do
-                                    read -rp $'\e[33;1mÖzel adınızı girin (sadece küçük harf ve rakam, boşluk içermeyin): \e[0m' custom_dns_name
-                                    if [[ ! "$custom_dns_name" =~ ^[a-z0-9-]+$ ]]; then
-                                        echo -e "${RB}Alan adı sadece küçük harf ve rakam içermeli, boşluk içermemeli!${NC}"
-                                        sleep 2
-                                        continue
-                                    fi
-                                    if [ -z "$custom_dns_name" ]; then
-                                        echo -e "${RB}Alan adı boş bırakılmamalı!${NC}"
-                                        sleep 2
-                                        continue
-                                    fi
-                                    NAME_A="$custom_dns_name.$DOMAIN"
-                                    NAME_CNAME="*.$NAME_A"
-                                    TARGET_CNAME="$NAME_A"
-
-                                    get_zone_id
-                                    if check_dns_record "$NAME_A" "$ZONE_ID"; then
-                                        echo -e "${RB}Alan adı zaten var! Lütfen tekrar deneyin.${NC}"
-                                        sleep 2
-                                    else
-                                        # get_zone_id
-                                        delete_records_based_on_ip
-                                        create_A_record
-                                        create_CNAME_record
-                                        install_acme_sh
-                                        return
-                                    fi
-                                done
-                                ;;
-                            3)
-                                break
-                                ;;
-                            *)
-                                echo -e "${RB}Geçersiz seçim!${NC}"
-                                sleep 2
-                                ;;
-                        esac
-                    done
-                done
-                ;;
-            2)
-                input_domain
-                install_acme_sh2
-                break
-                ;;
-            *)
-                echo -e "${RB}Geçersiz seçim!${NC}"
-                sleep 2
-                ;;
-        esac
-    done
-
-    sleep 2
-}
-
-# install_acme_sh fonksiyonunu çağırarak acme.sh'yi kurma ve sertifika alma
-#install_acme_sh
-#install_acme_sh2
-
-# Ana menüyü çalıştırma
 setup_domain
 
 echo -e "${GB}[ INFO ]${NC} ${YB}Nginx & Xray Config Setup${NC}"
