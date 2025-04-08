@@ -1,16 +1,16 @@
-## 1 Click Xray
-Ubuntu or Debian
+## 1 Tık Xray
+Ubuntu veya Debian
 
-Setelah pasang ketik `menu` untuk menampilkan menu
+Kurduktan sonra menüyü göstermek için `menu` yazın
 
-Skrip ini aman untuk di install ulang tanpa harus rebuild VPS
+Bu betik VPS'i yeniden oluşturmanıza gerek kalmadan güvenle yeniden kurulabilir
 
-Support VPS IPv6 Only, tetapi !!! saat SETUP DOMAIN wajib pilih no.2 / pilih domain sendiri (tidak mendukung opsi no.1)
+Sadece IPv6 VPS'i destekler, ancak !!! ALAN ADI KURULUMU sırasında no.2'yi seçmeniz / kendi alan adınızı seçmeniz gereklidir (no.1 seçeneği desteklenmez)
 
-Jika Script ini membantu jangan lupa sawerannya 😁😁
+Bu betik size yardımcı olduysa bağış yapmayı unutmayın 😁😁
 
-Saweria: https://saweria.co/dugonglewat
-| Protocol & Transport | Network Port |
+Bağış: https://saweria.co/dugonglewat
+| Protokol & Taşıma | Ağ Portu |
 |----------|--------|
 | Vmess Websocket | 443 & 80 |
 | Vless Websocket | 443 & 80 |
@@ -30,19 +30,19 @@ Saweria: https://saweria.co/dugonglewat
 | Shadowsocks gRPC | 443 |
 | Shadowsocks 2022 gRPC | 443 |
 
-**Link Instalasi Opsi 1**
+**Kurulum Bağlantısı Seçenek 1**
 ```
-bash -c "$(wget -qO- https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install.sh)"
+bash -c "$(wget -qO- https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install.sh)"
 ```
 ```
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install.sh)"
 ```
 
 
-**Link Instalasi Opsi 2**
+**Kurulum Bağlantısı Seçenek 2**
 ```
-bash -c "$(wget -qO- https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install2.sh)"
+bash -c "$(wget -qO- https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install2.sh)"
 ```
 ```
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install2.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install2.sh)"
 ```

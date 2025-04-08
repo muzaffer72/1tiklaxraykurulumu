@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Definisi Warna
+# Renk Tanımları
 NC='\e[0m'
 DEFBOLD='\e[39;1m'
 RB='\e[31;1m'
@@ -11,24 +11,24 @@ MB='\e[35;1m'
 CB='\e[36;1m'
 WB='\e[37;1m'
 
-# Fungsi untuk menghasilkan string acak
+# Rastgele dize oluşturma fonksiyonu
 generate_random_string() {
     cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w "$1" | head -n 1
 }
 
-# Fungsi untuk menghasilkan UUID
+# UUID oluşturma fonksiyonu
 generate_uuid() {
     cat /proc/sys/kernel/random/uuid
 }
 
-# Fungsi untuk menambahkan konfigurasi ke file Xray
+# Xray yapılandırmasına bölüm ekleme fonksiyonu
 add_xray_config() {
     local section=$1
     local content=$2
     sed -i "/#$section\$/a\\#&@ $user $exp\n$content" /usr/local/etc/xray/config/04_inbounds.json
 }
 
-# Inisialisasi Variabel
+# Değişkenlerin Başlatılması
 user=$(generate_random_string 7)
 domain=$(cat /usr/local/etc/xray/dns/domain)
 cipher="aes-256-gcm"
@@ -44,20 +44,20 @@ echo -e "${BB}——————————————————————
 valid_input=false
 
 while [ "$valid_input" = false ]; do
-    read -p "Active Period / Masa Aktif (days): " masaaktif
+    read -p "Aktif Süre / Kullanım Süresi (gün): " masaaktif
 
-    # Cek apakah input hanya berisi angka
+    # Girdinin sadece sayılardan oluştuğunu kontrol etme
     if [[ "$masaaktif" =~ ^[0-9]+$ ]]; then
         valid_input=true
     else
-        echo -e "${RB}Input harus berupa angka. Silakan coba lagi.${NC}"
+        echo -e "${RB}Girdi sadece sayı olmalıdır. Lütfen tekrar deneyin.${NC}"
     fi
 done
 
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
-# Menambahkan Konfigurasi ke File Xray
+# Xray Yapılandırma Dosyasına Ekleme
 add_xray_config "xtls" "},{\"flow\": \"xtls-rprx-vision\",\"id\": \"$uuid\",\"email\": \"$user\""
 add_xray_config "vless" "},{\"id\": \"$uuid\",\"email\": \"$user\""
 add_xray_config "universal" "},{\"id\": \"$uuid\",\"email\": \"$user\""
@@ -70,7 +70,7 @@ ISP=$(cat /usr/local/etc/xray/org)
 CITY=$(cat /usr/local/etc/xray/city)
 REG=$(cat /usr/local/etc/xray/region)
 
-# Fungsi untuk membuat tautan Vmess
+# Vmess bağlantı linki oluşturma fonksiyonu
 create_vmess_link() {
     local version="2"
     local ps=$1
@@ -95,14 +95,14 @@ create_vmess_link() {
 EOF
 }
 
-# Membuat Tautan Vmess
+# Vmess Bağlantıları Oluşturma
 vmesslink1="vmess://$(create_vmess_link "vmess-ws-tls" "443" "ws" "/vmess-ws" "tls")"
 vmesslink2="vmess://$(create_vmess_link "vmess-ws-ntls" "80" "ws" "/vmess-ws" "none")"
 vmesslink3="vmess://$(create_vmess_link "vmess-hup-tls" "443" "httpupgrade" "/vmess-hup" "tls")"
 vmesslink4="vmess://$(create_vmess_link "vmess-hup-ntls" "80" "httpupgrade" "/vmess-hup" "none")"
 vmesslink5="vmess://$(create_vmess_link "vmess-grpc" "443" "grpc" "vmess-grpc" "tls")"
 
-# Membuat Tautan Vless
+# Vless Bağlantıları Oluşturma
 vlesslink1="vless://$uuid@$domain:443?path=/vless-ws&security=tls&encryption=none&host=$domain&type=ws&sni=$domain#vless-ws-tls"
 vlesslink2="vless://$uuid@$domain:80?path=/vless-ws&security=none&encryption=none&host=$domain&type=ws#vless-ws-ntls"
 vlesslink3="vless://$uuid@$domain:443?path=/vless-hup&security=tls&encryption=none&host=$domain&type=httpupgrade&sni=$domain#vless-hup-tls"
@@ -110,7 +110,7 @@ vlesslink4="vless://$uuid@$domain:80?path=/vless-hup&security=none&encryption=no
 vlesslink5="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=gun&type=grpc&serviceName=vless-grpc&sni=$domain#vless-grpc"
 vlesslink6="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=none&type=tcp&sni=$domain&flow=xtls-rprx-vision#vless-vision"
 
-# Membuat Tautan Trojan
+# Trojan Bağlantıları Oluşturma
 trojanlink1="trojan://$pwtr@$domain:443?path=/trojan-ws&security=tls&host=$domain&type=ws&sni=$domain#trojan-ws-tls"
 trojanlink2="trojan://$pwtr@$domain:80?path=/trojan-ws&security=none&host=$domain&type=ws#trojan-ws-ntls"
 trojanlink3="trojan://$pwtr@$domain:443?path=/trojan-hup&security=tls&host=$domain&type=httpupgrade&sni=$domain#trojan-hup-tls"
@@ -118,7 +118,7 @@ trojanlink4="trojan://$pwtr@$domain:80?path=/trojan-hup&security=none&host=$doma
 trojanlink5="trojan://$pwtr@$domain:443?security=tls&type=grpc&mode=multi&serviceName=trojan-grpc&sni=$domain#trojan-grpc"
 trojanlink6="trojan://$pwtr@$domain:443?security=tls&type=tcp&sni=$domain#trojan-tcp-tls"
 
-# Membuat Tautan Shadowsocks
+# Shadowsocks Bağlantıları Oluşturma
 encode_ss() {
     echo -n "$1:$2" | base64 -w 0
 }
@@ -275,47 +275,47 @@ cat > /var/www/html/xray/xray-$user.html << END
     </header>
 
     <div class="section">
-        <h2><i class="fas fa-server"></i> Server Information</h2>
+        <h2><i class="fas fa-server"></i> Sunucu Bilgileri</h2>
         <pre>ISP            : ${ISP}
-Region         : ${REG}
-City           : ${CITY}
+Bölge          : ${REG}
+Şehir          : ${CITY}
 Port TLS/HTTPS : 443
 Port HTTP      : 80
 Transport      : XTLS-Vision, TCP TLS, HTTPupgrade, Websocket, gRPC
-Expired On     : ${exp}</pre>
+Bitiş Tarihi   : ${exp}</pre>
     </div>
 
     <hr>
 
     <!-- Vmess Links -->
     <div class="section">
-        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Vmess Links</h2>
+        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Vmess Bağlantıları</h2>
         <div class="accordion-content">
             <div class="link-section">
                 <div class="link-box">
                     <h3>Websocket TLS</h3>
                     <pre id="vmess-ws-tls">${vmesslink1}</pre>
-                    <button onclick="copyToClipboard('vmess-ws-tls')">Copy</button>
+                    <button onclick="copyToClipboard('vmess-ws-tls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>Websocket non TLS</h3>
                     <pre id="vmess-ws-ntls">${vmesslink2}</pre>
-                    <button onclick="copyToClipboard('vmess-ws-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('vmess-ws-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade TLS</h3>
                     <pre id="vmess-hup-tls">${vmesslink3}</pre>
-                    <button onclick="copyToClipboard('vmess-hup-tls')">Copy</button>
+                    <button onclick="copyToClipboard('vmess-hup-tls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade non TLS</h3>
                     <pre id="vmess-hup-ntls">${vmesslink4}</pre>
-                    <button onclick="copyToClipboard('vmess-hup-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('vmess-hup-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>gRPC</h3>
                     <pre id="vmess-grpc">${vmesslink5}</pre>
-                    <button onclick="copyToClipboard('vmess-grpc')">Copy</button>
+                    <button onclick="copyToClipboard('vmess-grpc')">Kopyala</button>
                 </div>
             </div>
         </div>
@@ -325,38 +325,38 @@ Expired On     : ${exp}</pre>
 
     <!-- Vless Links -->
     <div class="section">
-        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Vless Links</h2>
+        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Vless Bağlantıları</h2>
         <div class="accordion-content">
             <div class="link-section">
                 <div class="link-box">
                     <h3>Websocket TLS</h3>
                     <pre id="vless-ws-tls">${vlesslink1}</pre>
-                    <button onclick="copyToClipboard('vless-ws-tls')">Copy</button>
+                    <button onclick="copyToClipboard('vless-ws-tls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>Websocket non TLS</h3>
                     <pre id="vless-ws-ntls">${vlesslink2}</pre>
-                    <button onclick="copyToClipboard('vless-ws-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('vless-ws-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade TLS</h3>
                     <pre id="vless-hup-ntls">${vlesslink3}</pre>
-                    <button onclick="copyToClipboard('vless-hup-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('vless-hup-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade non TLS</h3>
                     <pre id="vless-hup-ntls">${vlesslink4}</pre>
-                    <button onclick="copyToClipboard('vless-hup-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('vless-hup-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>XTLS-RPRX-VISION</h3>
                     <pre id="vless-vision">${vlesslink5}</pre>
-                    <button onclick="copyToClipboard('vless-vision')">Copy</button>
+                    <button onclick="copyToClipboard('vless-vision')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>gRPC</h3>
                     <pre id="vless-grpc">${vlesslink6}</pre>
-                    <button onclick="copyToClipboard('vless-grpc')">Copy</button>
+                    <button onclick="copyToClipboard('vless-grpc')">Kopyala</button>
                 </div>
             </div>
         </div>
@@ -366,38 +366,38 @@ Expired On     : ${exp}</pre>
 
     <!-- Trojan Links -->
     <div class="section">
-        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Trojan Links</h2>
+        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Trojan Bağlantıları</h2>
         <div class="accordion-content">
             <div class="link-section">
                 <div class="link-box">
                     <h3>Websocket TLS</h3>
                     <pre id="trojan-ws-tls">${trojanlink1}</pre>
-                    <button onclick="copyToClipboard('trojan-ws-tls')">Copy</button>
+                    <button onclick="copyToClipboard('trojan-ws-tls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>Websocket non TLS</h3>
                     <pre id="trojan-ws-ntls">${trojanlink2}</pre>
-                    <button onclick="copyToClipboard('trojan-ws-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('trojan-ws-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade TLS</h3>
                     <pre id="trojan-hup-tls">${trojanlink3}</pre>
-                    <button onclick="copyToClipboard('trojan-hup-tls')">Copy</button>
+                    <button onclick="copyToClipboard('trojan-hup-tls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade non TLS</h3>
                     <pre id="trojan-hup-ntls">${trojanlink4}</pre>
-                    <button onclick="copyToClipboard('trojan-hup-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('trojan-hup-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>TCP TLS</h3>
                     <pre id="trojan-tcp">${trojanlink5}</pre>
-                    <button onclick="copyToClipboard('trojan-tcp')">Copy</button>
+                    <button onclick="copyToClipboard('trojan-tcp')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>gRPC</h3>
                     <pre id="trojan-grpc">${trojanlink6}</pre>
-                    <button onclick="copyToClipboard('trojan-grpc')">Copy</button>
+                    <button onclick="copyToClipboard('trojan-grpc')">Kopyala</button>
                 </div>
             </div>
         </div>
@@ -407,33 +407,33 @@ Expired On     : ${exp}</pre>
 
     <!-- Shadowsocks Links -->
     <div class="section">
-        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Shadowsocks Links</h2>
+        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Shadowsocks Bağlantıları</h2>
         <div class="accordion-content">
             <div class="link-section">
                 <div class="link-box">
                     <h3>Websocket TLS</h3>
                     <pre id="ss-ws-tls">${sslink1}</pre>
-                    <button onclick="copyToClipboard('ss-ws-tls')">Copy</button>
+                    <button onclick="copyToClipboard('ss-ws-tls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>Websocket non TLS</h3>
                     <pre id="ss-ws-ntls">${sslink2}</pre>
-                    <button onclick="copyToClipboard('ss-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('ss-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade TLS</h3>
                     <pre id="ss-hup-tls">${sslink3}</pre>
-                    <button onclick="copyToClipboard('ss-hup-tls')">Copy</button>
+                    <button onclick="copyToClipboard('ss-hup-tls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade non TLS</h3>
                     <pre id="ss-hup-ntls">${sslink4}</pre>
-                    <button onclick="copyToClipboard('ss-hup-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('ss-hup-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>gRPC</h3>
                     <pre id="ss-grpc">${sslink5}</pre>
-                    <button onclick="copyToClipboard('ss-grpc')">Copy</button>
+                    <button onclick="copyToClipboard('ss-grpc')">Kopyala</button>
                 </div>
             </div>
         </div>
@@ -443,42 +443,42 @@ Expired On     : ${exp}</pre>
 
     <!-- Shadowsocks 2022 Links -->
     <div class="section">
-        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Shadowsocks 2022 Links</h2>
+        <h2 onclick="toggleAccordion(this)"><i class="fas fa-link"></i> Shadowsocks 2022 Bağlantıları</h2>
         <div class="accordion-content">
             <div class="link-section">
                 <div class="link-box">
                     <h3>Websocket TLS</h3>
                     <pre id="ss2022-ws-tls">${ss22link1}</pre>
-                    <button onclick="copyToClipboard('ss2022-ws-tls')">Copy</button>
+                    <button onclick="copyToClipboard('ss2022-ws-tls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>Websocket non TLS</h3>
                     <pre id="ss2022-ws-ntls">${ss22link2}</pre>
-                    <button onclick="copyToClipboard('ss2022-ws-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('ss2022-ws-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade TLS</h3>
                     <pre id="ss2022-hup-tls">${ss22link3}</pre>
-                    <button onclick="copyToClipboard('ss2022-hup-tls')">Copy</button>
+                    <button onclick="copyToClipboard('ss2022-hup-tls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>HTTPupgrade non TLS</h3>
                     <pre id="ss2022-hup-ntls">${ss22link4}</pre>
-                    <button onclick="copyToClipboard('ss2022-hup-ntls')">Copy</button>
+                    <button onclick="copyToClipboard('ss2022-hup-ntls')">Kopyala</button>
                 </div>
                 <div class="link-box">
                     <h3>gRPC</h3>
                     <pre id="ss2022-grpc">${ss22link5}</pre>
-                    <button onclick="copyToClipboard('ss2022-grpc')">Copy</button>
+                    <button onclick="copyToClipboard('ss2022-grpc')">Kopyala</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="notification" id="notification">Copied to clipboard!</div>
+    <div class="notification" id="notification">Kopyalandı!</div>
 
     <footer>
-        <p>Xray VPN Page &copy; 2024</p>
+        <p>Xray VPN Sayfası &copy; 2024</p>
     </footer>
 
     <script>
@@ -531,20 +531,20 @@ systemctl restart xray
 # Clear Screen
 clear
 
-# Menampilkan Informasi ke Pengguna
+# Kullanıcıya Bilgi Gösterme
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
-echo -e "              ----- [ All Xray ] -----              " | tee -a /user/xray-$user.log
+echo -e "              ----- [ Tüm Xray ] -----              " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "ISP            : $ISP" | tee -a /user/xray-$user.log
-echo -e "Region         : $REG" | tee -a /user/xray-$user.log
-echo -e "City           : $CITY" | tee -a /user/xray-$user.log
+echo -e "Bölge          : $REG" | tee -a /user/xray-$user.log
+echo -e "Şehir          : $CITY" | tee -a /user/xray-$user.log
 echo -e "Port TLS/HTTPS : 443" | tee -a /user/xray-$user.log
 echo -e "Port HTTP      : 80" | tee -a /user/xray-$user.log
 echo -e "Transport      : XTLS-Vision, TCP TLS, Websocket, HTTPupgrade, gRPC" | tee -a /user/xray-$user.log
-echo -e "Expired On     : $exp" | tee -a /user/xray-$user.log
+echo -e "Bitiş Tarihi   : $exp" | tee -a /user/xray-$user.log
 echo -e "Link / Web     : https://$domain/xray/xray-$user.html" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
-echo -e "             ----- [ Vmess Link ] -----             " | tee -a /user/xray-$user.log
+echo -e "             ----- [ Vmess Bağlantısı ] -----             " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "Link WS TLS    : $vmesslink1" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
@@ -559,7 +559,7 @@ echo -e "${BB}——————————————————————
 echo -e " " | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
-echo -e "             ----- [ Vless Link ] -----             " | tee -a /user/xray-$user.log
+echo -e "             ----- [ Vless Bağlantısı ] -----             " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "Link WS TLS      : $vlesslink1" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
@@ -576,7 +576,7 @@ echo -e "${BB}——————————————————————
 echo -e " " | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
-echo -e "            ----- [ Trojan Link ] -----             " | tee -a /user/xray-$user.log
+echo -e "            ----- [ Trojan Bağlantısı ] -----             " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "Link WS TLS      : $trojanlink1" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
@@ -593,7 +593,7 @@ echo -e "${BB}——————————————————————
 echo -e " " | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
-echo -e "          ----- [ Shadowsocks Link ] -----          " | tee -a /user/xray-$user.log
+echo -e "          ----- [ Shadowsocks Bağlantısı ] -----          " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "Link WS TLS      : $sslink1" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
@@ -608,7 +608,7 @@ echo -e "${BB}——————————————————————
 echo -e " " | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
-echo -e "       ----- [ Shadowsocks 2022 Link ] -----        " | tee -a /user/xray-$user.log
+echo -e "       ----- [ Shadowsocks 2022 Bağlantısı ] -----        " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "Link WS TLS      : $ss22link1" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
@@ -623,6 +623,6 @@ echo -e "${BB}——————————————————————
 echo -e " " | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 
-read -n 1 -s -r -p "Press any key to go back to menu"
+read -n 1 -s -r -p "Menüye dönmek için herhangi bir tuşa basın"
 clear
 allxray

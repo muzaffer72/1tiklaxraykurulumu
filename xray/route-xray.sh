@@ -1,58 +1,58 @@
 #!/bin/bash
 
-# Warna untuk output (sesuaikan dengan kebutuhan)
-NC='\e[0m'       # No Color (mengatur ulang warna teks ke default)
-DEFBOLD='\e[39;1m' # Default Bold
-RB='\e[31;1m'    # Red Bold
-GB='\e[32;1m'    # Green Bold
-YB='\e[33;1m'    # Yellow Bold
-BB='\e[34;1m'    # Blue Bold
-MB='\e[35;1m'    # Magenta Bold
-CB='\e[36;1m'    # Cyan Bold
-WB='\e[37;1m'    # White Bold
+# Çıktı için renkler (ihtiyaca göre ayarlayın)
+NC='\e[0m'       # Renksiz (metin rengini varsayılana sıfırlar)
+DEFBOLD='\e[39;1m' # Varsayılan Kalın
+RB='\e[31;1m'    # Kırmızı Kalın
+GB='\e[32;1m'    # Yeşil Kalın
+YB='\e[33;1m'    # Sarı Kalın
+BB='\e[34;1m'    # Mavi Kalın
+MB='\e[35;1m'    # Magenta Kalın
+CB='\e[36;1m'    # Cyan Kalın
+WB='\e[37;1m'    # Beyaz Kalın
 
 CONFIG_FILE="/usr/local/etc/xray/config/06_routing.json"
 
-# Fungsi untuk Verifikasi
+# Doğrulama Fonksiyonu
 verification_1st() {
-    # Verifikasi perubahan
+    # Değişiklikleri doğrula
     if grep -q '"outboundTag": "warp"' $CONFIG_FILE; then
-        echo -e "${GB}Perubahan berhasil dilakukan.${NC}"
+        echo -e "${GB}Değişiklikler başarıyla yapıldı.${NC}"
     else
-        echo -e "${RB}Perubahan gagal, silakan periksa file konfigurasi.${NC}"
+        echo -e "${RB}Değişiklikler başarısız, lütfen yapılandırma dosyasını kontrol edin.${NC}"
     fi
 }
 
-# Fungsi untuk Verifikasi
+# Doğrulama Fonksiyonu
 verification_2nd() {
-    # Verifikasi perubahan
+    # Değişiklikleri doğrula
     if grep -q '"outboundTag": "direct"' $CONFIG_FILE; then
-        echo -e "${GB}Perubahan berhasil dilakukan.${NC}"
+        echo -e "${GB}Değişiklikler başarıyla yapıldı.${NC}"
     else
-        echo -e "${RB}Perubahan gagal, silakan periksa file konfigurasi.${NC}"
+        echo -e "${RB}Değişiklikler başarısız, lütfen yapılandırma dosyasını kontrol edin.${NC}"
     fi
 }
 
-# Fungsi untuk merutekan seluruh lalu lintas via WARP
+# Tüm trafiği WARP üzerinden yönlendirme fonksiyonu
 route_all_traffic() {
-    # Menggunakan 'sed' untuk mengganti 'outboundTag' dari 'direct' menjadi 'warp'
+    # 'direct' ifadesini 'warp' ile değiştirmek için 'sed' kullanma
     # sed -i '/"inboundTag": \[/,/"type": "field"/ s/"outboundTag": "direct"/"outboundTag": "warp"/' $CONFIG_FILE
     sed -i 's/"outboundTag": "direct"/"outboundTag": "warp"/g' $CONFIG_FILE
     verification_1st
     systemctl restart xray
 }
 
-# Fungsi untuk merutekan lalu lintas beberapa situs web via WARP
+# Bazı web sitesi trafiğini WARP üzerinden yönlendirme fonksiyonu
 route_some_traffic() {
-    # Menggunakan 'sed' untuk mengganti 'outboundTag' dari 'direct' menjadi 'warp' untuk domain tertentu
+    # Belirli alanlar için 'direct' ifadesini 'warp' ile değiştirmek için 'sed' kullanma
     sed -i '/"domain": \[/,/"type": "field"/ s/"outboundTag": "direct"/"outboundTag": "warp"/' $CONFIG_FILE
     verification_1st
     systemctl restart xray
 }
 
-# Fungsi untuk menonaktifkan rute WARP
+# WARP yönlendirmesini devre dışı bırakma fonksiyonu
 disable_route() {
-    # Menggunakan 'sed' untuk mengganti 'outboundTag' dari 'warp' menjadi 'direct'
+    # 'warp' ifadesini 'direct' ile değiştirmek için 'sed' kullanma
     sed -i 's/"outboundTag": "warp"/"outboundTag": "direct"/g' $CONFIG_FILE
     systemctl restart xray
 }
@@ -70,37 +70,37 @@ function_3rd() {
   verification_2nd
 }
 
-# Fungsi untuk menampilkan menu
+# Menü gösterme fonksiyonu
 show_wg_menu() {
     clear
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e "             ${WB}----- [ Route Xray Menu ] -----${NC}            "
+    echo -e "             ${WB}----- [ Xray Yönlendirme Menüsü ] -----${NC}            "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e ""
-    echo -e " ${MB}[1]${NC} ${YB}Route all traffic via WARP${NC}"
-    echo -e " ${MB}[2]${NC} ${YB}Route some website traffic via WARP${NC}"
-    echo -e " ${MB}[3]${NC} ${YB}Disable route WARP${NC}"
+    echo -e " ${MB}[1]${NC} ${YB}Tüm trafiği WARP üzerinden yönlendir${NC}"
+    echo -e " ${MB}[2]${NC} ${YB}Bazı web sitesi trafiğini WARP üzerinden yönlendir${NC}"
+    echo -e " ${MB}[3]${NC} ${YB}WARP yönlendirmesini devre dışı bırak${NC}"
     echo -e ""
-    echo -e " ${MB}[0]${NC} ${YB}Back To Menu${NC}"
+    echo -e " ${MB}[0]${NC} ${YB}Menüye Dön${NC}"
     echo -e ""
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e ""
 }
 
-# Fungsi untuk menangani input menu
+# Menü girişlerini işleme fonksiyonu
 handle_wg_menu() {
-    read -p " Select menu :  "  opt
+    read -p " Menü seçimi :  "  opt
     echo -e ""
     case $opt in
         1) function_1st ; sleep 2 ;;
         2) function_2nd ; sleep 2 ;;
         3) function_3rd ; sleep 2 ;;
         0) clear ; menu ;;
-        *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; show_wg_menu ;;
+        *) echo -e "${YB}Geçersiz giriş${NC}" ; sleep 1 ; show_wg_menu ;;
     esac
 }
 
-# Tampilkan menu dan tangani input pengguna
+# Menüyü göster ve kullanıcı girişini işle
 while true; do
     show_wg_menu
     handle_wg_menu

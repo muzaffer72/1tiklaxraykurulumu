@@ -11,8 +11,8 @@ CB='\e[36;1m'      # Cyan Bold
 WB='\e[37;1m'      # White Bold
 
 # Set your Cloudflare API credentials and zone ID
-API_EMAIL="1562apricot@awgarstone.com"
-API_KEY="e9c80c4d538c819701ea0129a2fd75ea599ba"
+API_EMAIL="guzelim.batmanli@gmail.com"
+API_KEY="4aa140cf85fde3adadad1856bdf67cf5ad460"
 
 # Set the DNS record details
 DOMAIN="vless.sbs"

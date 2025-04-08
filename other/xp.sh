@@ -1,5 +1,5 @@
 clear
-# ALLXRAY
+# ALLXRAY - TÜM XRAY
 data=($(cat /usr/local/etc/xray/config.json | grep '^#&@' | cut -d ' ' -f 2 | sort | uniq))
 now=$(date +"%Y-%m-%d")
 for user in "${data[@]}"; do

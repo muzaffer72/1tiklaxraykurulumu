@@ -1,48 +1,48 @@
 #!/bin/bash
 
-NC='\e[0m'         # No Color (mengatur ulang warna teks ke default)
-DEFBOLD='\e[39;1m' # Default Bold
-RB='\e[31;1m'      # Red Bold
-GB='\e[32;1m'      # Green Bold
-YB='\e[33;1m'      # Yellow Bold
-BB='\e[34;1m'      # Blue Bold
-MB='\e[35;1m'      # Magenta Bold
-CB='\e[36;1m'      # Cyan Bold
-WB='\e[37;1m'      # White Bold
+NC='\e[0m'         # Renksiz (metin rengini varsayılana sıfırlar)
+DEFBOLD='\e[39;1m' # Varsayılan Kalın
+RB='\e[31;1m'      # Kırmızı Kalın
+GB='\e[32;1m'      # Yeşil Kalın
+YB='\e[33;1m'      # Sarı Kalın
+BB='\e[34;1m'      # Mavi Kalın
+MB='\e[35;1m'      # Magenta Kalın
+CB='\e[36;1m'      # Cyan Kalın
+WB='\e[37;1m'      # Beyaz Kalın
 
-# Fungsi untuk mencetak pesan dengan warna
+# Renkli mesaj yazdırma fonksiyonu
 print_msg() {
     COLOR=$1
     MSG=$2
     echo -e "${COLOR}${MSG}${NC}"
 }
 
-# Fungsi untuk memeriksa keberhasilan perintah
+# Komut başarısını kontrol etme fonksiyonu
 check_success() {
     if [ $? -eq 0 ]; then
-        print_msg $GB "Berhasil"
+        print_msg $GB "Başarılı"
     else
-        print_msg $RB "Gagal: $1"
+        print_msg $RB "Başarısız: $1"
         exit 1
     fi
 }
 
-# Fungsi untuk menampilkan pesan kesalahan
+# Hata mesajı gösterme fonksiyonu
 print_error() {
     MSG=$1
-    print_msg $RB "Error: ${MSG}"
+    print_msg $RB "Hata: ${MSG}"
 }
 
-# Set your Cloudflare API credentials
-API_EMAIL="1562apricot@awgarstone.com"
-API_KEY="e9c80c4d538c819701ea0129a2fd75ea599ba"
+# Cloudflare API kimlik bilgilerinizi ayarlayın
+API_EMAIL="guzelim.batmanli@gmail.com"
+API_KEY="4aa140cf85fde3adadad1856bdf67cf5ad460"
 
-# Set the DNS record details
+# DNS kayıt detaylarını ayarlayın
 TYPE_A="A"
 TYPE_CNAME="CNAME"
 IP_ADDRESS=$(curl -sS ipv4.icanhazip.com)
 
-# Fungsi untuk memvalidasi domain
+# Alan adı doğrulama fonksiyonu
 validate_domain() {
     local domain=$1
     if [[ $domain =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
@@ -52,61 +52,61 @@ validate_domain() {
     fi
 }
 
-# Fungsi untuk meminta input domain
+# Alan adı giriş fonksiyonu
 input_domain() {
     while true; do
-        echo -e "${YB}Input Domain${NC}"
+        echo -e "${YB}Alan Adı Girin${NC}"
         echo " "
-        read -rp $'\e[33;1mInput domain kamu: \e[0m' -e dns
+        read -rp $'\e[33;1mAlan adınızı girin: \e[0m' -e dns
 
         if [ -z "$dns" ]; then
-            echo -e "${RB}Tidak ada input untuk domain!${NC}"
+            echo -e "${RB}Alan adı girilmedi!${NC}"
         elif ! validate_domain "$dns"; then
-            echo -e "${RB}Format domain tidak valid! Silakan input domain yang valid.${NC}"
+            echo -e "${RB}Alan adı formatı geçersiz! Lütfen geçerli bir alan adı girin.${NC}"
         else
             echo "$dns" > /usr/local/etc/xray/dns/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
-            echo -e "Domain ${GB}${dns}${NC} berhasil disimpan"
+            echo -e "Alan adı ${GB}${dns}${NC} başarıyla kaydedildi"
             break
         fi
     done
 }
 
-# Fungsi untuk mendapatkan Zone ID
+# Alan ID'sini alma fonksiyonu
 get_zone_id() {
-  echo -e "${YB}Getting Zone ID...${NC}"
+  echo -e "${YB}Alan ID'si alınıyor...${NC}"
   ZONE_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$DOMAIN" \
     -H "X-Auth-Email: $API_EMAIL" \
     -H "X-Auth-Key: $API_KEY" \
     -H "Content-Type: application/json" | jq -r '.result[0].id')
 
   if [ "$ZONE_ID" == "null" ]; then
-    echo -e "${RB}Gagal mendapatkan Zone ID${NC}"
+    echo -e "${RB}Alan ID'si alınamadı${NC}"
     exit 1
   fi
 
-  # Menyensor Zone ID (hanya menampilkan 3 karakter pertama dan terakhir)
+  # Alan ID'sini sensörleme (ilk ve son 3 karakteri gösterme)
   ZONE_ID_SENSORED="${GB}${ZONE_ID:0:3}*****${ZONE_ID: -3}"
 
-  echo -e "${YB}Zone ID: $ZONE_ID_SENSORED${NC}"
+  echo -e "${YB}Alan ID'si: $ZONE_ID_SENSORED${NC}"
 }
 
-# Fungsi untuk menangani respon API
+# API yanıtını işleme fonksiyonu
 handle_response() {
   local response=$1
   local action=$2
 
   success=$(echo $response | jq -r '.success')
   if [ "$success" == "true" ]; then
-    echo -e "$action ${YB}berhasil.${NC}"
+    echo -e "$action ${YB}başarılı.${NC}"
   else
-    echo -e "$action ${RB}gagal.${NC}"
+    echo -e "$action ${RB}başarısız.${NC}"
     errors=$(echo $response | jq -r '.errors[] | .message')
-    echo -e "${RB}Kesalahan: $errors${NC}"
+    echo -e "${RB}Hata: $errors${NC}"
   fi
 }
 
-# Fungsi untuk menghapus DNS record yang ada
+# Mevcut DNS kaydını silme fonksiyonu
 delete_record() {
   local record_name=$1
   local record_type=$2
@@ -118,30 +118,30 @@ delete_record() {
     -H "Content-Type: application/json" | jq -r '.result[0].id')
 
   if [ "$RECORD_ID" != "null" ]; then
-    echo -e "${YB}Menghapus record $record_type yang ada: ${CB}$record_name${NC} ${YB}.....${NC}"
+    echo -e "${YB}Mevcut $record_type kaydı siliniyor: ${CB}$record_name${NC} ${YB}.....${NC}"
     response=$(curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records/$RECORD_ID" \
       -H "X-Auth-Email: $API_EMAIL" \
       -H "X-Auth-Key: $API_KEY" \
       -H "Content-Type: application/json")
-    handle_response "$response" "${YB}Menghapus record $record_type:${NC} ${CB}$record_name${NC}"
+    handle_response "$response" "${YB}$record_type kaydı silindi:${NC} ${CB}$record_name${NC}"
   fi
 }
 
-# Fungsi untuk menghapus DNS record berdasarkan alamat IP
+# IP adresine göre DNS kayıtlarını silme fonksiyonu
 delete_records_based_on_ip() {
-  echo -e "${YB}Menghapus DNS records berdasarkan alamat IP: ${CB}$IP_ADDRESS${NC} ${YB}.....${NC}"
+  echo -e "${YB}IP adresine göre DNS kayıtları siliniyor: ${CB}$IP_ADDRESS${NC} ${YB}.....${NC}"
 
-  # Mendapatkan semua DNS record untuk zona tersebut
+  # Bölgedeki tüm DNS kayıtlarını alma
   dns_records=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
     -H "X-Auth-Email: $API_EMAIL" \
     -H "X-Auth-Key: $API_KEY" \
     -H "Content-Type: application/json")
 
-  # Mengurai dan menghapus A record yang cocok dan CNAME record yang terkait
+  # Eşleşen A kayıtlarını ve ilgili CNAME kayıtlarını çözümleme ve silme
   echo "$dns_records" | jq -c '.result[] | select(.type == "A" and .content == "'"$IP_ADDRESS"'")' | while read -r record; do
     record_name=$(echo "$record" | jq -r '.name')
     delete_record "$record_name" "A"
-    # Menghapus CNAME record yang terkait
+    # İlgili CNAME kayıtlarını silme
     cname_record=$(echo "$dns_records" | jq -c '.result[] | select(.type == "CNAME" and .content == "'"$record_name"'")')
     if [ -n "$cname_record" ]; then
       cname_record_name=$(echo "$cname_record" | jq -r '.name')
@@ -150,9 +150,9 @@ delete_records_based_on_ip() {
   done
 }
 
-# Fungsi untuk menambah A record
+# A kaydı oluşturma fonksiyonu
 create_A_record() {
-  echo -e "${YB}Menambah A record $GB$NAME_A$NC $YB.....${NC}"
+  echo -e "${YB}A kaydı ekleniyor: $GB$NAME_A$NC $YB.....${NC}"
   response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
     -H "X-Auth-Email: $API_EMAIL" \
     -H "X-Auth-Key: $API_KEY" \
@@ -166,12 +166,12 @@ create_A_record() {
     }')
   echo "$NAME_A" > /usr/local/etc/xray/dns/domain
   echo "DNS=$NAME_A" > /var/lib/dnsvps.conf
-  handle_response "$response" "${YB}Menambah A record $GB$NAME_A$NC"
+  handle_response "$response" "${YB}A kaydı eklendi: $GB$NAME_A$NC"
 }
 
-# Fungsi untuk menambah CNAME record
+# CNAME kaydı oluşturma fonksiyonu
 create_CNAME_record() {
-  echo -e "${YB}Menambah CNAME record untuk wildcard $GB$NAME_CNAME$NC $YB.....${NC}"
+  echo -e "${YB}Wildcard için CNAME kaydı ekleniyor: $GB$NAME_CNAME$NC $YB.....${NC}"
   response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
     -H "X-Auth-Email: $API_EMAIL" \
     -H "X-Auth-Key: $API_KEY" \
@@ -183,10 +183,10 @@ create_CNAME_record() {
       "ttl": 0,
       "proxied": false
     }')
-  handle_response "$response" "${YB}Menambah CNAME record untuk wildcard $GB$NAME_CNAME$NC"
+  handle_response "$response" "${YB}Wildcard için CNAME kaydı eklendi: $GB$NAME_CNAME$NC"
 }
 
-# Fungsi untuk memeriksa apakah DNS record sudah ada
+# DNS kaydının zaten var olup olmadığını kontrol etme fonksiyonu
 check_dns_record() {
   local record_name=$1
   local zone_id=$2
@@ -197,9 +197,9 @@ check_dns_record() {
     -H "Content-Type: application/json" | jq -r '.result | length')
 
   if [ "$RECORD_EXISTS" -gt 0 ]; then
-    return 0  # Record exists
+    return 0  # Kayıt var
   else
-    return 1  # Record does not exist
+    return 1  # Kayıt yok
   fi
 }
 
@@ -208,7 +208,7 @@ update_nginx_config() {
     # Get new domain from file
     NEW_DOMAIN=$(cat /usr/local/etc/xray/dns/domain)
     # Update server_name in Nginx configuration
-    wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/nginx.conf
+    wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/nginx.conf
     sed -i "s/server_name web.com;/server_name $NEW_DOMAIN;/g" /etc/nginx/nginx.conf
     sed -i "s/server_name \*.web.com;/server_name \*.$NEW_DOMAIN;/" /etc/nginx/nginx.conf
 

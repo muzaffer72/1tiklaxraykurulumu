@@ -2,126 +2,126 @@
 
 rm -rf install.sh
 clear
-# Warna untuk output (sesuaikan dengan kebutuhan)
-NC='\e[0m'       # No Color (mengatur ulang warna teks ke default)
-DEFBOLD='\e[39;1m' # Default Bold
-RB='\e[31;1m'    # Red Bold
-GB='\e[32;1m'    # Green Bold
-YB='\e[33;1m'    # Yellow Bold
-BB='\e[34;1m'    # Blue Bold
-MB='\e[35;1m'    # Magenta Bold
-CB='\e[36;1m'    # Cyan Bold
-WB='\e[37;1m'    # White Bold
+# Çıktı için renkler (ihtiyaca göre ayarlayın)
+NC='\e[0m'       # Renksiz (metin rengini varsayılana sıfırlar)
+DEFBOLD='\e[39;1m' # Varsayılan Kalın
+RB='\e[31;1m'    # Kırmızı Kalın
+GB='\e[32;1m'    # Yeşil Kalın
+YB='\e[33;1m'    # Sarı Kalın
+BB='\e[34;1m'    # Mavi Kalın
+MB='\e[35;1m'    # Magenta Kalın
+CB='\e[36;1m'    # Cyan Kalın
+WB='\e[37;1m'    # Beyaz Kalın
 
 secs_to_human() {
-echo -e "${WB}Installation time : $(( ${1} / 3600 )) hours $(( (${1} / 60) % 60 )) minute's $(( ${1} % 60 )) seconds${NC}"
+echo -e "${WB}Kurulum süresi : $(( ${1} / 3600 )) saat $(( (${1} / 60) % 60 )) dakika $(( ${1} % 60 )) saniye${NC}"
 }
 start=$(date +%s)
 
-# Fungsi untuk mencetak pesan dengan warna
+# Renkli mesaj yazdırma fonksiyonu
 print_msg() {
     COLOR=$1
     MSG=$2
     echo -e "${COLOR}${MSG}${NC}"
 }
 
-# Fungsi untuk memeriksa keberhasilan perintah
+# Komut başarısını kontrol etme fonksiyonu
 check_success() {
     if [ $? -eq 0 ]; then
-        print_msg $GB "Berhasil"
+        print_msg $GB "Başarılı"
     else
-        print_msg $RB "Gagal: $1"
+        print_msg $RB "Başarısız: $1"
         exit 1
     fi
 }
 
-# Fungsi untuk menampilkan pesan kesalahan
+# Hata mesajı gösterme fonksiyonu
 print_error() {
     MSG=$1
-    print_msg $RB "Error: ${MSG}"
+    print_msg $RB "Hata: ${MSG}"
 }
 
-# Memastikan pengguna adalah root
+# Kullanıcının root olduğundan emin olma
 if [ "$EUID" -ne 0 ]; then
-  print_error "Harap jalankan skrip ini sebagai root."
+  print_error "Lütfen bu betiği root olarak çalıştırın."
   exit 1
 fi
 
-# Selamat datang
-print_msg $YB "Selamat datang! Skrip ini akan memasang beberapa paket penting pada sistem Anda."
+# Karşılama
+print_msg $YB "Hoş geldiniz! Bu betik sisteminize bazı önemli paketleri yükleyecek."
 
-# Update package list
-print_msg $YB "Memperbarui daftar paket..."
+# Paket listesini güncelleme
+print_msg $YB "Paket listesi güncelleniyor..."
 apt update -y
 check_success
 sleep 1
 
-# Install paket pertama
-print_msg $YB "Memasang socat, netfilter-persistent, dan bsdmainutils..."
+# İlk paketlerin kurulumu
+print_msg $YB "socat, netfilter-persistent ve bsdmainutils yükleniyor..."
 apt install socat netfilter-persistent bsdmainutils -y
 check_success
 sleep 1
 
-# Install paket kedua
-print_msg $YB "Memasang vnstat, lsof, dan fail2ban..."
+# İkinci paketlerin kurulumu
+print_msg $YB "vnstat, lsof ve fail2ban yükleniyor..."
 apt install vnstat lsof fail2ban -y
 check_success
 sleep 1
 
-# Install paket ketiga
-print_msg $YB "Memasang jq, curl, sudo, dan cron..."
+# Üçüncü paketlerin kurulumu
+print_msg $YB "jq, curl, sudo ve cron yükleniyor..."
 apt install jq curl sudo cron -y
 check_success
 sleep 1
 
-# Install paket keempat
-print_msg $YB "Memasang build-essential dan dependensi lainnya..."
+# Dördüncü paketlerin kurulumu
+print_msg $YB "build-essential ve diğer bağımlılıklar yükleniyor..."
 apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd bind9-host gnupg2 ca-certificates lsb-release ubuntu-keyring debian-archive-keyring -y
 apt install unzip python-is-python3 python3-pip -y
 pip install psutil pandas tabulate rich py-cpuinfo distro requests pycountry geoip2 #--break-system-packages
 check_success
 sleep 1
 
-# Pesan selesai
-print_msg $GB "Semua paket telah berhasil dipasang!"
+# Tamamlandı mesajı
+print_msg $GB "Tüm paketler başarıyla yüklendi!"
 sleep 3
 clear
 
-# Selamat datang
-print_msg $YB "Selamat datang! Skrip ini akan memasang Xray-core dan melakukan beberapa konfigurasi pada sistem Anda."
+# Karşılama
+print_msg $YB "Hoş geldiniz! Bu betik Xray-core'u yükleyecek ve sisteminizde bazı yapılandırmalar yapacak."
 
-# Membuat direktori yang diperlukan
-print_msg $YB "Membuat direktori yang diperlukan..."
+# Gerekli dizinleri oluşturma
+print_msg $YB "Gerekli dizinler oluşturuluyor..."
 sudo mkdir -p /user /tmp /usr/local/etc/xray /var/log/xray
-check_success "Gagal membuat direktori."
+check_success "Dizinler oluşturulamadı."
 
-# Menghapus file konfigurasi lama jika ada
-print_msg $YB "Menghapus file konfigurasi lama..."
+# Varsa eski yapılandırma dosyalarını silme
+print_msg $YB "Eski yapılandırma dosyaları siliniyor..."
 sudo rm -f /usr/local/etc/xray/city /usr/local/etc/xray/org /usr/local/etc/xray/timezone /usr/local/etc/xray/region
-check_success "Gagal menghapus file konfigurasi lama."
+check_success "Eski yapılandırma dosyaları silinemedi."
 
-# Fungsi untuk mendeteksi OS dan distribusi
+# İşletim sistemi ve dağıtımı algılama fonksiyonu
 detect_os() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         OS=$NAME
         VERSION=$VERSION_ID
     else
-        print_msg $RB "Tidak dapat mendeteksi OS. Skrip ini hanya mendukung distribusi berbasis Debian dan Red Hat."
+        print_msg $RB "İşletim sistemi algılanamıyor. Bu betik yalnızca Debian ve Red Hat tabanlı dağıtımları destekler."
         exit 1
     fi
 }
 
-# Fungsi untuk memeriksa versi terbaru Xray-core
+# Xray-core'un en son sürümünü kontrol etme fonksiyonu
 get_latest_xray_version() {
     LATEST_VERSION=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | jq -r '.tag_name')
     if [ -z "$LATEST_VERSION" ]; then
-        print_msg $RB "Tidak dapat menemukan versi terbaru Xray-core."
+        print_msg $RB "Xray-core'un en son sürümü bulunamadı."
         exit 1
     fi
 }
 
-# Fungsi untuk memasang Xray-core
+# Xray-core'u yükleme fonksiyonu
 install_xray_core() {
     ARCH=$(uname -m)
     case $ARCH in
@@ -132,27 +132,27 @@ install_xray_core() {
             ARCH="arm64-v8a"
             ;;
         *)
-            print_msg $RB "Arsitektur $ARCH tidak didukung."
+            print_msg $RB "$ARCH mimarisi desteklenmiyor."
             exit 1
             ;;
     esac
 
     DOWNLOAD_URL="https://github.com/XTLS/Xray-core/releases/download/$LATEST_VERSION/Xray-linux-$ARCH.zip"
 
-    # Unduh dan ekstrak Xray-core
-    print_msg $YB "Mengunduh dan memasang Xray-core..."
+    # Xray-core'u indirme ve çıkarma
+    print_msg $YB "Xray-core indiriliyor ve yükleniyor..."
     curl -L -o xray.zip $DOWNLOAD_URL
-    check_success "Gagal mengunduh Xray-core."
+    check_success "Xray-core indirilemedi."
 
     sudo unzip -o xray.zip -d /usr/local/bin
-    check_success "Gagal mengekstrak Xray-core."
+    check_success "Xray-core çıkarılamadı."
     rm xray.zip
 
     sudo chmod +x /usr/local/bin/xray
-    check_success "Gagal mengatur izin eksekusi untuk Xray-core."
+    check_success "Xray-core için çalıştırma izni ayarlanamadı."
 
-    # Membuat layanan systemd
-    print_msg $YB "Mengkonfigurasi layanan systemd untuk Xray-core..."
+    # systemd servisi oluşturma
+    print_msg $YB "Xray-core için systemd servisi yapılandırılıyor..."
     sudo bash -c 'cat <<EOF > /etc/systemd/system/xray.service
 [Unit]
 Description=Xray Service
@@ -177,30 +177,30 @@ OOMScoreAdjust=100
 [Install]
 WantedBy=multi-user.target
 EOF'
-    check_success "Gagal mengkonfigurasi layanan systemd untuk Xray-core."
+    check_success "Xray-core için systemd servisi yapılandırılamadı."
 
     sudo systemctl daemon-reload
     sudo systemctl enable xray
     sudo systemctl start xray
-    check_success "Gagal memulai layanan Xray-core."
+    check_success "Xray-core servisi başlatılamadı."
 }
 
-# Deteksi OS
-print_msg $YB "Mendeteksi sistem operasi..."
+# İşletim sistemi algılama
+print_msg $YB "İşletim sistemi algılanıyor..."
 detect_os
 
-# Cek apakah OS didukung
+# İşletim sisteminin desteklenip desteklenmediğini kontrol etme
 if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" || "$OS" == "Debian GNU/Linux" || "$OS" == "CentOS" || "$OS" == "Fedora" || "$OS" == "Red Hat Enterprise Linux" ]]; then
-    print_msg $GB "Mendeteksi OS: $OS $VERSION"
+    print_msg $GB "İşletim sistemi algılandı: $OS $VERSION"
 else
-    print_msg $RB "Distribusi $OS tidak didukung oleh skrip ini. Proses instalasi dibatalkan."
+    print_msg $RB "Bu betik $OS dağıtımını desteklemiyor. Kurulum iptal edildi."
     exit 1
 fi
 
-# Memeriksa versi terbaru Xray-core
-print_msg $YB "Memeriksa versi terbaru Xray-core..."
+# Xray-core'un en son sürümünü kontrol etme
+print_msg $YB "Xray-core'un en son sürümü kontrol ediliyor..."
 get_latest_xray_version
-print_msg $GB "Versi terbaru Xray-core: $LATEST_VERSION"
+print_msg $GB "Xray-core'un en son sürümü: $LATEST_VERSION"
 
 # Memasang dependensi yang diperlukan
 print_msg $YB "Memasang dependensi yang diperlukan..."
@@ -254,7 +254,7 @@ print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi WireP
 
 print_msg $YB "Instalasi WireProxy"
 rm -rf /usr/local/bin/wireproxy >> /dev/null 2>&1
-wget -q -O /usr/local/bin/wireproxy https://github.com/dugong-lewat/1clickxray/raw/main/wireproxy
+wget -q -O /usr/local/bin/wireproxy https://github.com/muzaffer72/1tiklaxraykurulumu/raw/main/wireproxy
 chmod +x /usr/local/bin/wireproxy
 check_success "Gagal instalasi WireProxy."
 print_msg $YB "Mengkonfigurasi WireProxy"
@@ -377,8 +377,8 @@ mkdir -p /usr/local/etc/xray/dns >> /dev/null 2>&1
 touch /usr/local/etc/xray/dns/domain
 
 # Set your Cloudflare API credentials
-API_EMAIL="1562apricot@awgarstone.com"
-API_KEY="e9c80c4d538c819701ea0129a2fd75ea599ba"
+API_EMAIL="guzelim.batmanli@gmail.com"
+API_KEY="4aa140cf85fde3adadad1856bdf67cf5ad460"
 
 # Set the DNS record details
 TYPE_A="A"
@@ -550,8 +550,8 @@ check_dns_record() {
 install_acme_sh() {
     domain=$(cat /usr/local/etc/xray/dns/domain)
     rm -rf ~/.acme.sh/*_ecc >> /dev/null 2>&1
-    export CF_Email="1562apricot@awgarstone.com"
-    export CF_Key="e9c80c4d538c819701ea0129a2fd75ea599ba"
+    export CF_Email="guzelim.batmanli@gmail.com"
+    export CF_Key="4aa140cf85fde3adadad1856bdf67cf5ad460"
     curl https://get.acme.sh | sh
     source ~/.bashrc
     ~/.acme.sh/acme.sh --register-account -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
@@ -718,7 +718,7 @@ echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 
 # Konfigurasi Xray-core
 print_msg $YB "Mengonfigurasi Xray-core..."
-XRAY_CONFIG=raw.githubusercontent.com/dugong-lewat/1clickxray/main/config
+XRAY_CONFIG=raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/config
 wget -q -O /usr/local/etc/xray/config/00_log.json "https://${XRAY_CONFIG}/00_log.json"
 wget -q -O /usr/local/etc/xray/config/01_api.json "https://${XRAY_CONFIG}/01_api.json"
 wget -q -O /usr/local/etc/xray/config/02_dns.json "https://${XRAY_CONFIG}/02_dns.json"
@@ -1654,8 +1654,8 @@ sleep 1.5
 
 # Konfigurasi Nginx
 print_msg $YB "Mengonfigurasi Nginx..."
-wget -q -O /var/www/html/index.html https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/index.html
-wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/nginx.conf
+wget -q -O /var/www/html/index.html https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/index.html
+wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/nginx.conf
 domain=$(cat /usr/local/etc/xray/dns/domain)
 sed -i "s/server_name web.com;/server_name $domain;/g" /etc/nginx/nginx.conf
 sed -i "s/server_name \*.web.com;/server_name \*.$domain;/" /etc/nginx/nginx.conf
@@ -1675,7 +1675,7 @@ sudo iptables -A INPUT -p tcp --dport 6881:6889 -j DROP
 sudo iptables -A INPUT -p tcp --dport 6881:6889 -m string --algo bm --string "BitTorrent" -j DROP
 sudo iptables -A INPUT -p udp --dport 6881:6889 -m string --algo bm --string "BitTorrent" -j DROP
 cd /usr/bin
-GITHUB=raw.githubusercontent.com/dugong-lewat/1clickxray/main/
+GITHUB=raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/
 echo -e "${GB}[ INFO ]${NC} ${YB}Mengunduh menu utama...${NC}"
 wget -q -O menu "https://${GITHUB}/menu/menu.sh"
 wget -q -O allxray "https://${GITHUB}/menu/allxray.sh"
