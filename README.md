@@ -41,7 +41,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/muzaffer72/1tiklaxraykur
 
 **Kurulum Bağlantısı Seçenek 2**
 ```
-bash -c "$(wget -qO- https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install2.sh)"
+
+sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && bash -c "$(wget -qO- https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install2.sh)"
 ```
 ```
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install2.sh)"
