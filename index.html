@@ -2,66 +2,297 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Informasi IP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İp Bilgileri | Onvao VPN</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-  body {
-    font-family: 'Arial', sans-serif;
-    background-color: #454545;
-    color: #ffffff;
+  html, body {
+    height: 100%;
     margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 85vh;
-    padding: 35px;
-    box-sizing: border-box;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #0a0e17;
+    color: #ffffff;
     overflow: hidden;
   }
 
-  .stars, .twinkling, .clouds {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  .bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: linear-gradient(125deg, #0a0e17, #152238);
+    overflow: hidden;
+  }
+
+  /* Kar animasyonu için gerekli eklemeler */
+  .snowfall {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Şeffaf panel arkasında, ama diğer arka plan öğelerinin üzerinde */
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .snowflake {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    opacity: 0.8;
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+    animation: snowfall linear infinite;
+  }
+
+  @keyframes snowfall {
+    0% {
+      transform: translateY(-5vh) translateX(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.8;
+    }
+    90% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(105vh) translateX(20px);
+      opacity: 0;
+    }
+  }
+
+  /* Havai fişek animasyonu için CSS */
+  .fireworks-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .firework-rocket {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    z-index: 1;
+    box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.6);
+    animation: rocket-path 1.5s ease-in forwards;
+  }
+
+  .rocket-trail {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0), rgba(255, 165, 0, 0.8));
+    opacity: 0.7;
+  }
+
+  .firework {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    box-shadow: 0 0 12px 2px rgba(255, 255, 255, 0.8);
+    animation: explosion 1.2s ease-out forwards;
+    opacity: 0;
+  }
+
+  .particle {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: block;
+    animation: particle 1s ease-out forwards;
   }
 
-  .stars {
-    background: #000 url('https://www.script-tutorials.com/demos/360/images/stars.png') repeat top center;
-    z-index: 0;
+  @keyframes rocket-path {
+    0% {
+      transform: translateY(0) scale(0.8);
+      opacity: 1;
+    }
+    70% {
+      transform: translateY(-100vh) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-110vh) scale(0);
+      opacity: 0;
+    }
   }
 
-  .twinkling {
-    background: transparent url('https://www.script-tutorials.com/demos/360/images/twinkling.png') repeat top center;
-    z-index: 1;
-    animation: move-twink-back 200s linear infinite;
+  @keyframes explosion {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
   }
 
-  @keyframes move-twink-back {
-    from { background-position: 0 0; }
-    to { background-position: -10000px 5000px; }
+  @keyframes particle {
+    0% {
+      transform: translate(0, 0);
+      opacity: 1;
+    }
+    20% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--tx), var(--ty));
+      opacity: 0;
+    }
+  }
+
+  .network-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(rgba(33, 150, 243, 0.1) 2px, transparent 2px),
+      radial-gradient(rgba(33, 150, 243, 0.1) 2px, transparent 2px);
+    background-size: 50px 50px;
+    background-position: 0 0, 25px 25px;
+    animation: gridAnimation 60s linear infinite;
+  }
+
+  @keyframes gridAnimation {
+    0% {
+      background-position: 0 0, 25px 25px;
+    }
+    100% {
+      background-position: 1000px 0, 1025px 25px;
+    }
+  }
+
+  .glow-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.15;
+  }
+
+  .glow-circle:nth-child(1) {
+    top: 20%;
+    left: 20%;
+    width: 300px;
+    height: 300px;
+    background: #1976d2;
+    animation: float 15s ease-in-out infinite;
+  }
+
+  .glow-circle:nth-child(2) {
+    bottom: 15%;
+    right: 15%;
+    width: 200px;
+    height: 200px;
+    background: #651fff;
+    animation: float 20s ease-in-out infinite reverse;
+  }
+
+  .glow-circle:nth-child(3) {
+    top: 40%;
+    right: 30%;
+    width: 150px;
+    height: 150px;
+    background: #00e5ff;
+    animation: float 18s ease-in-out infinite 5s;
+  }
+
+  @keyframes float {
+    0% { transform: translate(0, 0); }
+    50% { transform: translate(-20px, 20px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  .content-wrapper {
+    width: 90%;
+    max-width: 960px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .info-container {
-    background-color: rgba(51, 51, 51, 0.5);
-    border-radius: 18px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 40px;
+    background: rgba(25, 31, 46, 0.8);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: clamp(15px, 3vw, 40px);
     width: 100%;
-    max-width: 960px;
+    height: 100%;
     box-sizing: border-box;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .header-section {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .header-title {
+    font-size: clamp(22px, 4vw, 32px);
+    color: #fff;
+    margin: 0;
+    font-weight: 700;
+  }
+  
+  .header-subtitle {
+    font-size: clamp(14px, 2vw, 18px);
+    color: rgba(255, 255, 255, 0.7);
+    margin: 5px 0 0 0;
+  }
+  
+  .info-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
   }
   
   .info {
-    font-size: 50px;
-    color: rgba(255, 255, 255, 1);
-    border-bottom: 2px solid rgba(17, 253, 255, 1);
-    padding: 30px 0;
+    font-size: clamp(16px, 3.5vw, 32px);
+    color: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid rgba(33, 150, 243, 0.3);
+    padding: clamp(8px, 1vw, 20px) 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: all 0.3s ease;
+  }
+  
+  .info:hover {
+    background-color: rgba(33, 150, 243, 0.05);
+    border-bottom: 1px solid rgba(33, 150, 243, 0.5);
   }
   
   .info:last-child {
@@ -71,20 +302,30 @@
   .info-title {
     font-weight: bold;
     margin-right: 10px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .info-icon {
+    margin-right: 10px;
+    opacity: 0.8;
+    color: #2196f3;
   }
   
   .loading-text {
-    color: #2fff3b;
+    color: #64ffda;
   }
   
   .error-text {
-    color: #ff2424;
+    color: #ff5252;
   }
   
   #country-flag {
     margin-right: 12px;
-    width: 40px;
-    height: 31px;
+    width: clamp(20px, 2vw, 40px);
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
   
   .loading-dots {
@@ -92,21 +333,23 @@
   }
 
   .loading-dot {
-    width: 10px;
-    height: 10px;
-    background-color: #3498db;
+    width: 6px;
+    height: 6px;
+    background-color: #2196f3;
     border-radius: 50%;
     display: inline-block;
-    margin-right: 5px;
+    margin-right: 3px;
     animation: loading-dots 1.4s infinite both;
   }
 
   .loading-dot:nth-child(2) {
     animation-delay: -0.16s;
+    background-color: #00e5ff;
   }
 
   .loading-dot:nth-child(3) {
     animation-delay: -0.32s;
+    background-color: #651fff;
   }
 
   @keyframes loading-dots {
@@ -118,37 +361,217 @@
     }
   }
   
+  .footer-section {
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 20px;
+  }
+  
   .copyright {
-    font-size: 30px;
-    margin-top: 70px;
+    font-size: clamp(16px, 2vw, 22px);
+    margin-top: clamp(10px, 2vh, 30px);
     align-items: center;
     display: flex;
     justify-content: center;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
   }
   
   .copyright2 {
-    font-size: 30px;
-    margin-top: 15px;
+    font-size: clamp(14px, 1.8vw, 20px);
+    margin-top: 8px;
     align-items: center;
     display: flex;
     justify-content: center;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+  }
+
+  .app-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(12px, 2vw, 20px);
+    margin: clamp(15px, 2vh, 25px) 0;
+  }
+  
+  .app-button {
+    display: inline-flex;
+    align-items: center;
+    padding: clamp(8px, 1.5vw, 16px) clamp(15px, 2.5vw, 25px);
+    background: linear-gradient(135deg, #2196f3, #1976d2);
     color: #ffffff;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: clamp(12px, 1.8vw, 20px);
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .app-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: all 0.5s ease;
+  }
+  
+  .app-button:hover::before {
+    left: 100%;
+  }
+  
+  .app-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+  }
+  
+  .app-icon {
+    margin-right: clamp(5px, 1vw, 10px);
+    font-style: normal;
+    font-size: clamp(16px, 2vw, 24px);
+  }
+  
+  /* Çok küçük ekranlar için */
+  @media (max-height: 600px) {
+    .content-wrapper {
+      height: 98vh;
+    }
+    
+    .info-container {
+      padding: 12px;
+    }
+    
+    .info {
+      padding: 6px 0;
+    }
+    
+    .app-buttons {
+      margin: 8px 0;
+    }
+    
+    .copyright {
+      margin-top: 8px;
+    }
+    
+    .header-section {
+      margin-bottom: 10px;
+    }
+  }
+
+  /* Telefon ekranları için yatay mod */
+  @media (max-width: 768px) and (orientation: landscape) {
+    .content-wrapper {
+      height: auto;
+      padding: 10px 0;
+    }
+    
+    .info-container {
+      padding: 15px;
+    }
+    
+    .info {
+      font-size: clamp(14px, 2.5vw, 20px);
+    }
+    
+    .app-buttons {
+      flex-direction: row;
+    }
+  }
+  
+  /* Telefon ekranları için dikey mod */
+  @media (max-width: 480px) {
+    .info {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .info-title {
+      margin-bottom: 5px;
+    }
+    
+    .app-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .app-button {
+      width: 100%;
+      max-width: 280px;
+      justify-content: center;
+    }
+    
+    .header-section {
+      margin-bottom: 15px;
+    }
   }
 </style>
 </head>
 <body>
-<div class="stars"></div>
-<div class="twinkling"></div>
+<div class="bg-animation">
+  <div class="network-grid"></div>
+  <div class="glow-circle"></div>
+  <div class="glow-circle"></div>
+  <div class="glow-circle"></div>
+</div>
 
-<div class="info-container">
-  <div class="info"><span class="info-title">IPv4 Adresi:</span> <span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span></div>
-  <div class="info"><span class="info-title">ISP:</span> <span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span></div>
-  <div class="info"><span class="info-title">ASN:</span> <span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span></div>
-  <div class="info"><span class="info-title">Şehir:</span> <span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span></div>
-  <div class="info" id="country-container"><span class="info-title">Ülke:</span> <div style="display: flex; align-items: center;"><img id="country-flag" src="" alt="Flag" style="display:none;"/><span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span></div></div>
-  <div class="copyright">Onvao.net tarafından desteklenmektedir.</div>
-  <div class="copyright2">2025 © onvao.net</div>
+<div class="snowfall" id="snowfall"></div>
+<div class="fireworks-container" id="fireworks-container"></div>
+
+<div class="content-wrapper">
+  <div class="info-container">
+    <div class="header-section">
+      <h1 class="header-title">Onvao VPN Bağlantı Bilgileriniz</h1>
+      <p class="header-subtitle">Güvenli ve hızlı bağlantınızın detayları</p>
+    </div>
+    
+    <div class="info-section">
+      <div class="info">
+        <span class="info-title"><i class="fas fa-network-wired info-icon"></i>IPv4 Adresi:</span> 
+        <span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span>
+      </div>
+      <div class="info">
+        <span class="info-title"><i class="fas fa-globe info-icon"></i>ISP:</span> 
+        <span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span>
+      </div>
+      <div class="info">
+        <span class="info-title"><i class="fas fa-server info-icon"></i>ASN:</span> 
+        <span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span>
+      </div>
+      <div class="info">
+        <span class="info-title"><i class="fas fa-city info-icon"></i>Şehir:</span> 
+        <span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span>
+      </div>
+      <div class="info" id="country-container">
+        <span class="info-title"><i class="fas fa-map-marker-alt info-icon"></i>Ülke:</span> 
+        <div style="display: flex; align-items: center;">
+          <img id="country-flag" src="" alt="Flag" style="display:none;"/>
+          <span class="loading-text"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-section">
+      <div class="copyright">Onvao.net tarafından desteklenmektedir.</div>
+      
+      <div class="app-buttons">
+        <a href="https://play.google.com/store/apps/details?id=onvao.net.vpn" target="_blank" class="app-button">
+          <i class="fab fa-google-play app-icon"></i> Shadowsocks VPN İndir
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=app.ikev2.vpn" target="_blank" class="app-button">
+          <i class="fab fa-google-play app-icon"></i> IKEv2 VPN İndir
+        </a>
+      </div>
+      
+      <div class="copyright2">2025 © onvao.net</div>
+    </div>
+  </div>
 </div>
  
 <script>
@@ -158,11 +581,135 @@
 
   function displayError(selector) {
     const element = document.querySelector(selector);
-    element.textContent = 'Informasi tidak tersedia';
+    element.textContent = 'Bilgi alınamadı';
     element.classList.add('error-text');
     if (element.parentNode.querySelector('.loading-dots')) {
       element.parentNode.querySelector('.loading-dots').style.display = 'none';
     }
+  }
+
+  // Havai fişek oluşturma fonksiyonu
+  function createFirework(x, y) {
+    const fireworksContainer = document.getElementById('fireworks-container');
+    const colors = [
+      '#FF0000', '#FF3300', '#FF6600', '#FF9900', 
+      '#FFCC00', '#FFFF00', '#CCFF00', '#99FF00', 
+      '#66FF00', '#33FF00', '#00FF00', '#00FF33', 
+      '#00FF66', '#00FF99', '#00FFCC', '#00FFFF', 
+      '#00CCFF', '#0099FF', '#0066FF', '#0033FF', 
+      '#0000FF', '#3300FF', '#6600FF', '#9900FF', 
+      '#CC00FF', '#FF00FF', '#FF00CC', '#FF0099'
+    ];
+    
+    // Rastgele havai fişek ana rengi seç
+    const mainColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    // İlk önce yukarı çıkan roket oluştur
+    const rocket = document.createElement('div');
+    rocket.classList.add('firework-rocket');
+    
+    // Başlangıç pozisyonu - ekranın altından
+    const startX = x;
+    const startY = window.innerHeight + 5; // Ekranın biraz altından başlat
+    
+    rocket.style.left = `${startX}px`;
+    rocket.style.bottom = '0px';
+    
+    // Roket izi
+    const trail = document.createElement('div');
+    trail.classList.add('rocket-trail');
+    rocket.appendChild(trail);
+    
+    // Roketin rengi ve gölgesi
+    rocket.style.backgroundColor = mainColor;
+    rocket.style.boxShadow = `0 0 6px 2px ${mainColor}`;
+    
+    fireworksContainer.appendChild(rocket);
+    
+    // Roket uçuş sesi ekle (opsiyonel)
+    // const audio = new Audio('rocket.mp3');
+    // audio.volume = 0.2;
+    // audio.play();
+    
+    // Roket tepe noktaya ulaştığında patlasın
+    setTimeout(() => {
+      // Patlama konumu
+      const explosionX = startX;
+      const explosionY = y;
+      
+      // Havai fişek merkezi
+      const firework = document.createElement('div');
+      firework.classList.add('firework');
+      firework.style.left = `${explosionX}px`;
+      firework.style.top = `${explosionY}px`;
+      firework.style.backgroundColor = mainColor;
+      firework.style.boxShadow = `0 0 12px 2px ${mainColor}`;
+      fireworksContainer.appendChild(firework);
+      
+      // Parçacıklar oluştur
+      const particlesCount = 40 + Math.floor(Math.random() * 30);
+      
+      for (let i = 0; i < particlesCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Rastgele renk - ana renge yakın tonlarda
+        let color = mainColor;
+        if (Math.random() > 0.7) {
+          color = colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        particle.style.backgroundColor = color;
+        particle.style.boxShadow = `0 0 6px 1px ${color}`;
+        
+        // Rastgele yön
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 30 + Math.random() * 80; // Daha uzağa patlama
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        
+        particle.style.setProperty('--tx', `${tx}px`);
+        particle.style.setProperty('--ty', `${ty}px`);
+        
+        firework.appendChild(particle);
+      }
+      
+      // Patlama sesi ekle (opsiyonel)
+      // const boomAudio = new Audio('explosion.mp3');
+      // boomAudio.volume = 0.3;
+      // boomAudio.play();
+      
+      // Tamamlandıktan sonra kaldır
+      setTimeout(() => {
+        fireworksContainer.removeChild(firework);
+      }, 1500);
+      
+    }, 1100); // Roketin tepe noktaya varma süresi
+    
+    // Roketi süre sonunda kaldır
+    setTimeout(() => {
+      fireworksContainer.removeChild(rocket);
+    }, 1500);
+  }
+  
+  // Rastgele havai fişek patlatma
+  function randomFireworks() {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    // Her 1000-3000ms arasında rastgele bir havai fişek oluştur
+    const minDelay = 1000;
+    const maxDelay = 3000;
+    const delay = minDelay + Math.random() * (maxDelay - minDelay);
+    
+    setTimeout(() => {
+      // Ekranda rastgele bir konumda havai fişek oluştur
+      const x = 50 + Math.random() * (screenWidth - 100); // Kenarlarda biraz boşluk bırak
+      const y = 50 + Math.random() * (screenHeight * 0.6); // Ekranın üst kısmında patlasın
+      
+      createFirework(x, y);
+      randomFireworks();
+    }, delay);
   }
 
   fetch('https://api.ipify.org?format=json')
@@ -185,6 +732,20 @@
       document.querySelectorAll('.loading-dots').forEach((dots) => {
         dots.style.display = 'none';
       });
+      
+      // Bilgiler yüklendiğinde başlangıç havai fişekleri
+      setTimeout(() => {
+        for (let i = 0; i < 6; i++) {
+          setTimeout(() => {
+            const x = 100 + (i * (window.innerWidth - 200) / 5); // Ekran genişliğine dengeli dağıt
+            const y = 100 + Math.random() * (window.innerHeight * 0.4); // Ekranın üst kısmında patlasın
+            createFirework(x, y);
+          }, i * 300);
+        }
+        
+        // Ardından rastgele havai fişekler devam etsin
+        setTimeout(randomFireworks, 2500);
+      }, 500);
     })
     .catch(error => {
       console.error('Error:', error);
@@ -194,6 +755,49 @@
       displayError('.info-container .info:nth-child(4) .loading-text');
       displayError('.info-container .info:nth-child(5) .loading-text');
     });
+    
+  // Kar taneleri oluşturma fonksiyonu
+  function createSnowflakes() {
+    const snowfall = document.getElementById('snowfall');
+    const snowflakeCount = 100; // Daha fazla kar tanesi
+    
+    // Önceden oluşturulan kar tanelerini temizle
+    snowfall.innerHTML = '';
+    
+    for (let i = 0; i < snowflakeCount; i++) {
+      const snowflake = document.createElement('div');
+      snowflake.classList.add('snowflake');
+      
+      // Rastgele boyut - daha büyük olacak şekilde
+      const size = Math.random() * 6 + 2; // 2-8px arası
+      snowflake.style.width = `${size}px`;
+      snowflake.style.height = `${size}px`;
+      
+      // Rastgele başlangıç konumu
+      snowflake.style.left = `${Math.random() * 100}%`;
+      snowflake.style.top = `${Math.random() * 100}%`; // Başlangıçta farklı konumlarda olması için
+      
+      // Rastgele animasyon süresi
+      const duration = Math.random() * 15 + 8; // 8-23s arası
+      snowflake.style.animationDuration = `${duration}s`;
+      
+      // Rastgele animasyon gecikmesi
+      const delay = Math.random() * 10; // Daha fazla gecikme farkı
+      snowflake.style.animationDelay = `${delay}s`;
+      
+      // Kar tanesine hafif mavi ton ekle
+      const blueHue = Math.floor(Math.random() * 30 + 200); // 200-230 arasında mavi tonlar
+      snowflake.style.backgroundColor = `rgba(${blueHue}, ${blueHue + 20}, 255, ${Math.random() * 0.4 + 0.4})`; // Daha belirgin opaklık (0.4-0.8)
+      
+      snowfall.appendChild(snowflake);
+    }
+  }
+  
+  // Sayfa yüklendiğinde kar tanelerini oluştur
+  window.addEventListener('load', createSnowflakes);
+  
+  // Pencere yeniden boyutlandırıldığında kar tanelerini yeniden oluştur
+  window.addEventListener('resize', createSnowflakes);
 </script>
 </body>
 </html>

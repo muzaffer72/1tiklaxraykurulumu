@@ -85,6 +85,14 @@ sleep 1
 # Tamamlandı mesajı
 print_msg $GB "Tüm paketler başarıyla yüklendi!"
 sleep 3
+
+# Zaman dilimini İstanbul olarak ayarla
+print_msg $YB "Zaman dilimi İstanbul olarak ayarlanıyor..."
+timedatectl set-timezone Europe/Istanbul
+check_success "Zaman dilimi ayarlanamadı."
+print_msg $GB "Zaman dilimi İstanbul olarak ayarlandı."
+sleep 1
+
 clear
 
 # Karşılama

@@ -144,126 +144,426 @@ cat > /var/www/html/xray/xray-$user.html << END
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xray VPN</title>
+    <title>Onvao.net Bağlantı yönetimi</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Google Sans', sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+        html, body {
+            height: 100%;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            font-family: 'Google Sans', sans-serif;
+            background-color: #0a0e17;
+            color: #ffffff;
+            overflow-x: hidden;
         }
+
+        body {
+            background: linear-gradient(125deg, #0a0e17, #152238);
+            min-height: 100vh;
+        }
+
+        /* Arka plan animasyonu */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .network-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+              radial-gradient(rgba(33, 150, 243, 0.1) 2px, transparent 2px),
+              radial-gradient(rgba(33, 150, 243, 0.1) 2px, transparent 2px);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            animation: gridAnimation 60s linear infinite;
+        }
+
+        @keyframes gridAnimation {
+            0% {
+                background-position: 0 0, 25px 25px;
+            }
+            100% {
+                background-position: 1000px 0, 1025px 25px;
+            }
+        }
+
+        .glow-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.15;
+        }
+
+        .glow-circle:nth-child(1) {
+            top: 20%;
+            left: 20%;
+            width: 300px;
+            height: 300px;
+            background: #1976d2;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .glow-circle:nth-child(2) {
+            bottom: 15%;
+            right: 15%;
+            width: 200px;
+            height: 200px;
+            background: #651fff;
+            animation: float 20s ease-in-out infinite reverse;
+        }
+
+        .glow-circle:nth-child(3) {
+            top: 40%;
+            right: 30%;
+            width: 150px;
+            height: 150px;
+            background: #00e5ff;
+            animation: float 18s ease-in-out infinite 5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, 20px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* Kar efekti stilleri */
+        .snowfall {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* Havai fişek stilleri */
+        .fireworks-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Ana içerik */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 2;
+        }
+
         header, footer {
-            background-color: #4CAF50;
+            background: rgba(25, 31, 46, 0.8);
             color: white;
-            padding: 10px 20px;
+            padding: 20px;
             text-align: center;
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
         }
+
+        header h1 {
+            color: #fff;
+            font-size: 32px;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .server-info {
+            background: rgba(25, 31, 46, 0.8);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
         h2 {
-            color: #4CAF50;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 2px solid rgba(33, 150, 243, 0.5);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
             font-size: 24px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
+
+        h2 i {
+            color: #2196f3;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        h2:hover {
+            color: #2196f3;
+        }
+
         pre {
-            background-color: #272822;
-            color: #f8f8f2;
-            padding: 15px;
-            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #64ffda;
+            padding: 20px;
+            border-radius: 12px;
             overflow-x: auto;
             font-family: "Courier New", Courier, monospace;
             margin-bottom: 20px;
-            border: 2px solid #4CAF50;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            font-size: 15px;
+            line-height: 1.5;
         }
+
         .section {
             margin-bottom: 40px;
+            background: rgba(25, 31, 46, 0.8);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 25px;
         }
-        hr {
-            display: none;
-            border: none;
-            border-top: 2px solid #4CAF50;
-            margin: 40px 0;
-        }
+
         .link-section {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
         }
+
         .link-box {
             flex: 1;
             min-width: 300px;
             max-width: 100%;
-            padding: 15px;
-            border: 2px solid #4CAF50;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 15px;
+            background-color: rgba(15, 20, 30, 0.6);
             margin-bottom: 20px;
             box-sizing: border-box;
+            transition: all 0.3s ease;
         }
+
+        .link-box:hover {
+            border-color: rgba(33, 150, 243, 0.7);
+            background-color: rgba(15, 20, 30, 0.8);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .link-box h3 {
+            color: #2196f3;
+            margin-top: 0;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(33, 150, 243, 0.3);
+            padding-bottom: 10px;
+        }
+
         button, .copy-button {
             display: inline-block;
-            padding: 10px 15px;
+            padding: 12px 20px;
             border: none;
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, #2196f3, #1976d2);
             color: white;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
-            margin: 5px 0;
+            margin: 10px 0 0 0;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
         }
+
+        button::before, .copy-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        button:hover::before, .copy-button:hover::before {
+            left: 100%;
+        }
+
+        button:hover, .copy-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+        }
+
         .notification {
             display: none;
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: #363ddf;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            background: rgba(100, 255, 218, 0.9);
+            color: #0a0e17;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             z-index: 1000;
+            font-weight: bold;
+            animation: fadeInOut 2s ease;
         }
-        footer {
-            font-size: 14px;
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
         }
+
         .accordion-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-out;
         }
+
         .accordion-content.show {
-            max-height: 1000px; /* Adjust based on content size or use a large value */
+            max-height: 5000px;
         }
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #121212;
-                color: #e0e0e0;
-            }
-            header, footer {
-                background-color: #4CAF50;
-                color: white;
-            }
-            .link-box {
-                background-color: #333;
-                border-color: #4CAF50;
-            }
-            pre {
-                background-color: #1e1e1e;
-                border-color: #4CAF50;
-            }
-            button, .copy-button {
-                background-color: #4CAF50;
-                color: white;
-            }
+
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
         }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .app-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .app-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        .app-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .app-button:hover::before {
+            left: 100%;
+        }
+
+        .app-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .app-button i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
         @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
             h2 {
                 font-size: 20px;
             }
+            
             .link-box {
                 min-width: 100%;
+            }
+            
+            pre {
+                font-size: 13px;
+                padding: 15px;
+            }
+            
+            button, .copy-button, .app-button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            header h1 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 18px;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .app-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .app-button {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
             }
         }
     </style>
@@ -478,7 +778,19 @@ Bitiş Tarihi   : ${exp}</pre>
     <div class="notification" id="notification">Kopyalandı!</div>
 
     <footer>
-        <p>Xray VPN Sayfası &copy; 2024</p>
+        <div class="footer-content">
+            <div class="copyright">
+                <p>Xray VPN Sayfası &copy; 2025 - Detaylı bilgi ve destek için onvao.net sitemizi ziyaret edebilirsiniz. T.me/onvaovpn telegram hesabından da ulaşabilirsiniz.</p>
+            </div>
+            <div class="app-buttons">
+                <a href="https://play.google.com/store/apps/details?id=onvao.net.vpn" target="_blank" class="app-button">
+                    <i class="fab fa-google-play"></i> Shadowsocks VPN İndir
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=app.ikev2.vpn" target="_blank" class="app-button">
+                    <i class="fab fa-google-play"></i> IKEv2 VPN İndir
+                </a>
+            </div>
+        </div>
     </footer>
 
     <script>

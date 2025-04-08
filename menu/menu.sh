@@ -16,9 +16,9 @@ show_menu() {
     clear
     python /usr/bin/system_info.py
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e "               ${WB}----- [ Xray Betiği ] -----${NC}              "
-    echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e "                   ${WB}----- [ Menü ] -----${NC}               "
+    # Domain bilgisini al
+    domain=$(cat /usr/local/etc/xray/dns/domain)
+    echo -e "               ${WB}----- [ $domain ] -----${NC}              "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e " ${MB}[1]${NC} ${YB}Xray Menüsü${NC}"
     echo -e " ${MB}[2]${NC} ${YB}Xray Yönlendirme${NC}"
