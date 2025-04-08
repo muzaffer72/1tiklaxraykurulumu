@@ -1694,7 +1694,7 @@ systemctl restart cron
 clear
 echo ""
 echo -e "${BB}—————————————————————————————————————————————————————————${NC}"
-echo -e "                  ${WB}XRAY SCRIPT BY DUGONG${NC}"
+echo -e "                  ${WB}BU SCRİPT ONVAO.NET TARAFINDAN GÜNCELLEŞTİRİLİYOR${NC}"
 echo -e "${BB}—————————————————————————————————————————————————————————${NC}"
 echo -e "                 ${WB}»»» Protocol Service «««${NC}  "
 echo -e "${BB}—————————————————————————————————————————————————————————${NC}"

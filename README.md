@@ -1,7 +1,7 @@
 ## 1 Tık Xray
 Ubuntu veya Debian
-
-Kurduktan sonra menüyü göstermek için `menu` yazın
+Ubuntu 22 de test edildi sorunsuz çalışıyor. 
+Kurduktan sonra menüyü görmek  için `menu` yazın
 
 Bu betik VPS'i yeniden oluşturmanıza gerek kalmadan güvenle yeniden kurulabilir
 
@@ -9,7 +9,7 @@ Sadece IPv6 VPS'i destekler, ancak !!! ALAN ADI KURULUMU sırasında no.2'yi se�
 
 Bu betik size yardımcı olduysa bağış yapmayı unutmayın 😁😁
 
-Bağış: https://saweria.co/dugonglewat
+Bağış: https://t.me/onvaovpn
 | Protokol & Taşıma | Ağ Portu |
 |----------|--------|
 | Vmess Websocket | 443 & 80 |
@@ -45,5 +45,5 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/muzaffer72/1tiklaxraykur
 sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && bash -c "$(wget -qO- https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install2.sh)"
 ```
 ```
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install2.sh)"
+sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && bash -c "$(curl -fsSL https://raw.githubusercontent.com/muzaffer72/1tiklaxraykurulumu/main/install2.sh)"
 ```
