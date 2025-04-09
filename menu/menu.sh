@@ -18,7 +18,8 @@ show_menu() {
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     # Domain bilgisini al
     domain=$(cat /usr/local/etc/xray/dns/domain)
-    echo -e "               ${WB}----- [ $domain ] -----${NC}              "
+    echo -e "               ${WB}----- [ $domain ] -----${NC}     
+    echo -e "Bağlantılar    : https://$domain/xray/xray-$user.html" | tee -a /user/xray-$user.log         "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e " ${MB}[1]${NC} ${YB}Xray Menüsü${NC}"
     echo -e " ${MB}[2]${NC} ${YB}Xray Yönlendirme${NC}"
