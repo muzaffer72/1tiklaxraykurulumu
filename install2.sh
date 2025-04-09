@@ -247,7 +247,7 @@ curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.
 sudo apt-get install -y speedtest &>/dev/null
 print_msg $YB "Speedtest CLI başarıyla kuruldu."
 
-# Mengatur zona waktu ke Asia/Jakarta
+# Mengatur zona waktu ke Europe/Istanbul
 print_msg $YB "Zaman dilimi Avrupa/İstanbul olarak ayarlanıyor..."
 sudo timedatectl set-timezone Europe/Istanbul &>/dev/null
 print_msg $YB "Zaman dilimi başarıyla ayarlandı."
