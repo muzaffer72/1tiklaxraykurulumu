@@ -33,7 +33,7 @@ show_menu() {
         echo -e "${YB}Mevcut hesaplar:${NC}"
         # Her hesap için bağlantı bilgisi görüntüle
         for user in $user_files; do
-            echo -e "Bağlantı ($user): ${GB}https://$domain/xray/xray-$user.html${NC}" | tee -a /root/xray-accounts.log
+            echo -e "Bağlantılar ${GB}https://$domain/xray/xray-$user.html${NC}" | tee -a /root/xray-accounts.log
         done
     else
         # Eğer hesap dosyası bulunamadıysa
