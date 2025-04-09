@@ -18,8 +18,29 @@ show_menu() {
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     # Domain bilgisini al
     domain=$(cat /usr/local/etc/xray/dns/domain)
-    echo -e "               ${WB}----- [ $domain ] -----${NC}"     
-    echo -e "Bağlantılar    : https://$domain/xray/xray-$user.html" | tee -a /user/xray-$user.log
+    echo -e "               ${WB}----- [ $domain ] -----${NC}"
+    
+    # Kullanıcı adını almak için farklı yöntemler
+    # 1. Mevcut kullanıcıyı al
+    current_user=$(whoami)
+    
+    # 2. Var olan xray hesaplarını listeleme
+    # /var/www/html/xray/ dizinindeki hesap dosyalarını bulma
+    user_files=$(find /var/www/html/xray/ -name "xray-*.html" 2>/dev/null | sed 's|.*/xray-\(.*\)\.html|\1|')
+    
+    # Eğer dosyalar bulunduysa
+    if [ -n "$user_files" ]; then
+        echo -e "${YB}Mevcut hesaplar:${NC}"
+        # Her hesap için bağlantı bilgisi görüntüle
+        for user in $user_files; do
+            echo -e "Bağlantı ($user): ${GB}https://$domain/xray/xray-$user.html${NC}" | tee -a /root/xray-accounts.log
+        done
+    else
+        # Eğer hesap dosyası bulunamadıysa
+        echo -e "${YB}Bağlantılar:${NC} ${RB}Henüz hesap oluşturulmamış.${NC}" 
+        echo -e "${GB}Hesap oluşturmak için Xray Menüsü'nü (1) kullanın.${NC}"
+    fi
+    
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e " ${MB}[1]${NC} ${YB}Xray Menüsü${NC}"
     echo -e " ${MB}[2]${NC} ${YB}Xray Yönlendirme${NC}"
